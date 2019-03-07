@@ -1,0 +1,14 @@
+{
+  "name": "fhir-mapper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:standardhealth/fhir-mapper.git",
+  "author": "Matthew Gramigna <mgramigna@mitre.org>",
+  "license": "MIT",
+  "scripts": {
+    "test:lint": "eslint \"src/**/*.js\""
+  },
+  "devDependencies": {
+    "eslint": "^5.15.1"
+  }
+}
