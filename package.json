@@ -10,5 +10,9 @@
   },
   "devDependencies": {
     "eslint": "^5.15.1"
+  },
+  "dependencies": {
+    "fhirpath": "^0.10.2",
+    "lodash": "^4.17.11"
   }
 }
