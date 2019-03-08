@@ -3,7 +3,7 @@
 Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto the incoming FHIR. 
 
 ## Current Mappers
-* Synthea FHIR => mCODE v0.5 (`src/mappers/genericToV05.js`)
+* Synthea FHIR => mCODE v0.5 (`src/mappers/syntheaToV05.js`)
 
 ## Local Development
 
@@ -64,11 +64,11 @@ module.exports = buildMappers(resourceMapping);
 Lastly, add the new mapper to be exported by `src/mapping/mappers/index.js`:
 
 ``` JavaScript
-const genericToV05 = require('./genericToV05');
+const syntheaToV05 = require('./syntheaToV05');
 const yourNewMapper = require('./<your-mapper>.js'); // want to export new mapper to use in project
 
 module.exports = {
-    genericToV05,
+    syntheaToV05,
     yourNewMapper
 };
 ```

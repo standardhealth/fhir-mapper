@@ -1,5 +1,5 @@
-const genericToV05 = require('./genericToV05');
+const syntheaToV05 = require('./syntheaToV05');
 
 module.exports = {
-    genericToV05
+    syntheaToV05
 };
