@@ -78,6 +78,8 @@ Now, the new mapper will be available in the desired project:
 ``` JavaScript
 /* other project's file that needs to do mapping */
 import { yourNewMapper } from 'fhir-mapper';
+// ...
+yourNewMapper.execute(resources) // resources is an array of entries
 ```
 
 ### Linting
