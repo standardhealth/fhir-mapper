@@ -5,6 +5,36 @@ Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto
 ## Current Mappers
 * Synthea FHIR => mCODE v0.5 (`src/mappers/syntheaToV05.js`)
 
+## Quickstart
+
+Install into your project via yarn:
+
+``` bash
+$ yarn add fhir-mapper
+```
+
+In the file where the mapping needs to be done, import one of the supported mappers (e.g. Synthea) directly into the project. Here is an example of utilizing the Synthea mapper to add mCODE v0.5 profiles onto Synthea FHIR:
+
+``` JavaScript
+import { syntheaToV05 } from 'fhir-mapper';
+
+const json = {/* obtained Synthea FHIR json */};
+const entries = [];
+
+const resources = json.entry.map(e => e.resource);
+const results = syntheaToV05.execute(resources);
+const wrappedResults = results.map(resource => {
+    return {
+        fullUrl: `urn:uuid:${resource.id}`,
+        resource,
+        request: { method: 'POST', url: resource.resourceType }
+    }
+});
+json.entry = wrappedResults;
+
+entries.push(...bundle.entry); // Array of entries with mCODE profiles
+```
+
 ## Local Development
 
 To get started with local development for testing or adding/modifying mappers, first clone and install the dependencies:
