@@ -1,6 +1,6 @@
 {
   "name": "fhir-mapper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/app.bundle.js",
   "repository": "git@github.com:standardhealth/fhir-mapper.git",
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
