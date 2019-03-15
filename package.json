@@ -1,21 +1,25 @@
 {
   "name": "fhir-mapper",
   "version": "1.0.2",
-  "main": "dist/index.js",
+  "main": "dist/app.bundle.js",
   "repository": "git@github.com:standardhealth/fhir-mapper.git",
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
   "license": "MIT",
   "scripts": {
     "test:lint": "eslint \"src/**/*.js\"",
-    "build": "babel --presets es2015 -d dist/ src"
+    "build": "babel --presets es2015 -d dist/ src",
+    "webpack": "webpack"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "eslint": "^5.15.1"
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.15.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
   },
   "dependencies": {
-    "fhirpath": "^0.10.2",
+    "fhirpath": "^0.10.3",
     "lodash": "^4.17.11"
   }
 }
