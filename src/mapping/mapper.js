@@ -139,6 +139,14 @@ class AggregateMapper {
   execute(resource){
     if (Array.isArray(resource)){
       return resource.map( r => this.execute(r)).filter(n => n);
+    } else if (resource.resourceType === 'Bundle') {
+      resource.entry = resource.entry.map(e => {
+        return {
+          fullUrl: e.fullUrl,
+          resource: this.execute(e.resource)
+        };
+      });
+      return resource;
     } else {
       if (this.ignore(resource) || !this.filter(resource)){return resource;}
       if (this.exclude(resource)){return null;}

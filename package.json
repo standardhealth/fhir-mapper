@@ -7,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "test:lint": "eslint \"src/**/*.js\"",
-    "build": "babel --presets es2015 -d dist/ src",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "watch": "webpack --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
