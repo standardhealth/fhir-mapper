@@ -13,13 +13,11 @@ const DEFAULT_PROFILE = {
     'Patient': 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/shr-entity-Patient',
     'Observation': 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/shr-base-Observation', // TODO: see also NonLaboratoryObservation & descendents, LaboratoryObservation, etc????
     'Encounter': 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/shr-encounter-Encounter',
-    '': '',
-
-    // below are TODO
     'Condition': 'http://example.com/shr-base-ConditionPresentAssertion',
     'Procedure': 'http://example.com/shr-procedure-ProcedurePerformed',
-    'Organization': 'shr-entity-Organization',
-    'Practitioner': 'shr-entity-Practitioner', // ?
+    'Organization': 'http://example.com/shr-entity-Organization',
+    'Practitioner': 'http://example.com/shr-entity-Practitioner',
+
     // 'MedicationRequest': 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest', // TODO: this is a us-core so there's no ES6 object for it... MedicationRequested?
 
     // no mappings for any of these
