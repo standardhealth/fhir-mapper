@@ -4,6 +4,7 @@ Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto
 
 ## Current Mappers
 * Synthea FHIR => mCODE v0.5 (`src/mappers/syntheaToV05.js`)
+* Synthea FHIR => mCODE v0.9 (`src/mappers/syntheaToV09.js`)
 
 ## Quickstart
 
@@ -122,7 +123,7 @@ To apply mappings to a file standalone, a CLI option is included.
 
 Usage:
 ```
-> node src/cli.js <mapper> <input> <output>
+> yarn map <mapper> <input> <output>
 ```
 Where:
  - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `syntheaToV05`
@@ -134,8 +135,7 @@ Where:
  Sample:
 
  ```
-
-$ node src/cli.js syntheaToV09 ~/synthea/output/fhir_dstu2/ output
+$ yarn map syntheaToV09 ~/synthea/output/fhir_dstu2/ output
 Processing ~/synthea/output/fhir_dstu2/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
 Wrote output/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
 Processing ~/synthea/output/fhir_dstu2/Aaron697_Lind531_9a572c87-2074-4263-9be5-281f55ee0e90.json
