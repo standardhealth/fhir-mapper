@@ -14,7 +14,31 @@ const applyProfileFunction = (profile) => {
     return (resource) => applyProfile(resource, profile);
 };
 
-const defaultProfile = (resourceType) => `http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-${resourceType}`;
+const defaultProfile = (resourceType) => {
+    switch (resourceType) {
+        case 'MedicationOrder':
+            return 'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-MedicationRequest';
+
+        case 'AllergyIntolerance':
+        case 'Condition':
+        case 'DiagnosticReport':
+        case 'Encounter':
+        case 'MedicationAdministration':
+        case 'MedicationOrder':
+        case 'Observation':
+        case 'Organization':
+        case 'Patient':
+        case 'Practitioner':
+        case 'Procedure':
+            return `http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-${resourceType}`;
+
+
+        default:
+            // notable resourceTypes used in Synthea that do not have an SHR profile: CarePlan, Goal, Claim, Immunization, ImagingStudy
+            // for that reason, only apply profiles we know actually exist
+            return null;
+    }
+}
 
 // FHIRPath supports list membership tests, but not list literals (as far as I can tell).
 // so instead of something nice like "where(code in ['1','2','3'])" we have to do "where(code = '1' or code = '2' or code = '3')"
