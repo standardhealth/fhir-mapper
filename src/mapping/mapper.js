@@ -109,24 +109,24 @@ class AggregateMapper {
   // if an ignore filter was provided execute it on the resource otherwise
   // return false
   ignore(resource){
-    return this.ignoreFn ? this.ignoreFn(resource) : false;
+    return this.ignoreFn ? this.ignoreFn(resource, context) : false;
   }
 
   // if an exclude filter was provided execute it on the resource otherwise return false
   exclude(resource){
-    return this.excludeFn ? this.excludeFn(resource) : false;
+    return this.excludeFn ? this.excludeFn(resource, context) : false;
   }
 
   // if a default function was provided execute that function on the resource otherwise
   // return the resource as is
   default(resource){
-    return this.defaultFn ? this.defaultFn(resource) : resource;
+    return this.defaultFn ? this.defaultFn(resource, context) : resource;
   }
 
   // if a filter was provided execute that on the resource otherwise
   // return false
   filter(resource){
-    return (this.filterFn) ? this.filterFn(resource) : false;
+    return (this.filterFn) ? this.filterFn(resource, context) : false;
   }
 
   // This method executes the aggregate filters.  There is a set order of operations
@@ -136,25 +136,25 @@ class AggregateMapper {
   // if the resource matches a mapper that this aggregate mapper contains apply that mapper
   // if the resource does not match a contained mapper run the default function on the resource
   //
-  execute(resource){
+  execute(resource, context){
     if (Array.isArray(resource)){
-      return resource.map( r => this.execute(r)).filter(n => n);
+      return resource.map( r => this.execute(r, context)).filter(n => n);
     } else if (resource.resourceType === 'Bundle') {
       resource.entry = resource.entry.map(e => {
         return {
           fullUrl: e.fullUrl,
-          resource: this.execute(e.resource)
+          resource: this.execute(e.resource, context)
         };
       });
       return resource;
     } else {
-      if (this.ignore(resource) || !this.filter(resource)){return resource;}
-      if (this.exclude(resource)){return null;}
-      let mapper = this.mappers.find(map => map.filter(resource));
+      if (this.ignore(resource, context) || !this.filter(resource, context)){return resource;}
+      if (this.exclude(resource, context)){return null;}
+      let mapper = this.mappers.find(map => map.filter(resource, context));
       if (mapper){
-        return mapper.execute(resource);
+        return mapper.execute(resource, context);
       } else {
-        return this.default(resource);
+        return this.default(resource, context);
       }
     }
   }
@@ -173,15 +173,15 @@ class FilterMapper {
 
   // if a filter was provided execute that function on the resource otherwise
   // return false
-  filter(resource){
-    return (this.filterFn) ? this.filterFn(resource) : false;
+  filter(resource,context){
+    return (this.filterFn) ? this.filterFn(resource, context) : false;
   }
 
-  execute(resource){
+  execute(resource, context){
     if (Array.isArray(resource)){
-      return resource.map( r => this.execute(r)).filter(n => n);
+      return resource.map( r => this.execute(r, context)).filter(n => n);
     }
-    return this.execfn(resource);
+    return this.execfn(resource, context);
   }
 }
 
