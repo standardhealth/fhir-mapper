@@ -108,24 +108,24 @@ class AggregateMapper {
 
   // if an ignore filter was provided execute it on the resource otherwise
   // return false
-  ignore(resource){
+  ignore(resource, context){
     return this.ignoreFn ? this.ignoreFn(resource, context) : false;
   }
 
   // if an exclude filter was provided execute it on the resource otherwise return false
-  exclude(resource){
+  exclude(resource, context){
     return this.excludeFn ? this.excludeFn(resource, context) : false;
   }
 
   // if a default function was provided execute that function on the resource otherwise
   // return the resource as is
-  default(resource){
+  default(resource, context){
     return this.defaultFn ? this.defaultFn(resource, context) : resource;
   }
 
   // if a filter was provided execute that on the resource otherwise
   // return false
-  filter(resource){
+  filter(resource, context){
     return (this.filterFn) ? this.filterFn(resource, context) : false;
   }
 
