@@ -76,11 +76,11 @@ describe('Mapping Tests', () => {
                         return resource;
                       }
                 };
-    let context = {"codes" : ["1", "23232", "34343"]}
+    let context = {'codes': ['1', '23232', '34343']};
     let filterMapper = buildFilterMappers(filterJson, context);
     expect(filterMapper).toBeTruthy();
-    let resource1 = {resourceType: 'Condition', code: {coding: {code: "23232"}}};
-    let resource2 = {resourceType: 'Condition', code: {coding: {code: "hey"}}};
+    let resource1 = {resourceType: 'Condition', code: {coding: {code: '23232'}}};
+    let resource2 = {resourceType: 'Condition', code: {coding: {code: 'hey'}}};
     expect(filterMapper.filter(resource1)).toBeTruthy();
     expect(filterMapper.filter(resource2)).toBeFalsy();
     let mapped = filterMapper.execute(resource1);
@@ -88,7 +88,7 @@ describe('Mapping Tests', () => {
 
   });
 
-  
+
 
   test('should be able to create a resourceMapper from json', () => {
     let resourceMapping = {
@@ -146,14 +146,14 @@ describe('Mapping Tests', () => {
       filter: 'Patient',
       ignore: "Patient.meta.profile.where($this = 'something')",
       exclude: ["Patient.name.where($this.given = 'James')"],
-      default: (resource, _context={}) => {
+      default: (resource, _context = {}) => {
           resource.meta = {profile: ['some:uri:here']};
           return resource;
       },
       mappers: [
         {filter: "Patient.name.where($this.given = 'Bob')",
-         exec: (resource, context={}) => {
-              if(context.mapBob){
+         exec: (resource, context = {}) => {
+              if (context.mapBob){
                 resource.mapped = 'Its Mapped';
                 return resource;
               }
@@ -166,7 +166,7 @@ describe('Mapping Tests', () => {
     let rtm = new ResourceTypeMapper(resourceMapping);
     let james = {resourceType: 'Patient', name: {given: 'James'}};
     let bob = {resourceType: 'Patient', name: {given: 'Bob'}};
-    
+
 
     let mapped = rtm.execute(james);
     expect(mapped).toBeFalsy();

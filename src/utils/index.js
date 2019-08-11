@@ -7,4 +7,4 @@ const applyProfile = (resource, profile) => {
     return resource;
 };
 
-module.exports = {applyProfile}
+module.exports = {applyProfile};

@@ -173,7 +173,7 @@ class FilterMapper {
 
   // if a filter was provided execute that function on the resource otherwise
   // return false
-  filter(resource,context){
+  filter(resource, context){
     return (this.filterFn) ? this.filterFn(resource, context) : false;
   }
 
