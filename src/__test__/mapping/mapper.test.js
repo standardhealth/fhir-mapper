@@ -68,6 +68,26 @@ describe('Mapping Tests', () => {
 
   });
 
+  test('should be able to create a filterMapper with a context', () => {
+    let buildFilterMappers = mapping.__get__('buildMappers');
+    let filterJson = {filter: 'Condition.code.coding.code in %codes.first()',
+                      exec: (resource) => {
+                        resource.mapped = 'Its Mapped';
+                        return resource;
+                      }
+                };
+    let context = {"codes" : ["1", "23232", "34343"]}
+    let filterMapper = buildFilterMappers(filterJson, context);
+    expect(filterMapper).toBeTruthy();
+    let resource1 = {resourceType: 'Condition', code: {coding: {code: "23232"}}};
+    let resource2 = {resourceType: 'Condition', code: {coding: {code: "hey"}}};
+    expect(filterMapper.filter(resource1)).toBeTruthy();
+    expect(filterMapper.filter(resource2)).toBeFalsy();
+    let mapped = filterMapper.execute(resource1);
+    expect(mapped.mapped).toBe('Its Mapped');
+
+  });
+
   test('should be able to create a resourceMapper from json', () => {
     let resourceMapping = {
       filter: 'Patient',
