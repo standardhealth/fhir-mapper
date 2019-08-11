@@ -88,18 +88,20 @@ describe('Mapping Tests', () => {
 
   });
 
+  
+
   test('should be able to create a resourceMapper from json', () => {
     let resourceMapping = {
       filter: 'Patient',
       ignore: "Patient.meta.profile.where($this = 'something')",
       exclude: ["Patient.name.where($this.given = 'James')"],
-      default: (resource) => {
+      default: (resource, _context) => {
           resource.meta = {profile: ['some:uri:here']};
           return resource;
       },
       mappers: [
         {filter: "Patient.name.where($this.given = 'Bob')",
-         exec: (resource) => {
+         exec: (resource, _context) => {
               resource.mapped = 'Its Mapped';
               return resource;
           }
@@ -135,6 +137,45 @@ describe('Mapping Tests', () => {
     expect(mapped).toBeTruthy();
     expect(mapped.mapped).toBeFalsy();
     expect(mapped.meta.profile).toEqual(['some:uri:here']);
+
+  });
+
+
+  test('should be able to execute mapper with a context for addtional information', () => {
+    let resourceMapping = {
+      filter: 'Patient',
+      ignore: "Patient.meta.profile.where($this = 'something')",
+      exclude: ["Patient.name.where($this.given = 'James')"],
+      default: (resource, _context={}) => {
+          resource.meta = {profile: ['some:uri:here']};
+          return resource;
+      },
+      mappers: [
+        {filter: "Patient.name.where($this.given = 'Bob')",
+         exec: (resource, context={}) => {
+              if(context.mapBob){
+                resource.mapped = 'Its Mapped';
+                return resource;
+              }
+          }
+        }
+      ]
+    };
+
+    let ResourceTypeMapper = mapping.__get__('AggregateMapper');
+    let rtm = new ResourceTypeMapper(resourceMapping);
+    let james = {resourceType: 'Patient', name: {given: 'James'}};
+    let bob = {resourceType: 'Patient', name: {given: 'Bob'}};
+    
+
+    let mapped = rtm.execute(james);
+    expect(mapped).toBeFalsy();
+    mapped = rtm.execute(bob);
+    expect(mapped).toBeFalsy();
+    mapped = rtm.execute(bob, {mapBob: false});
+    expect(mapped).toBeFalsy();
+    mapped = rtm.execute(bob, {mapBob: true});
+    expect(mapped.mapped).toBeTruthy();
 
   });
 
