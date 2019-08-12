@@ -24,7 +24,7 @@ const defaultProfile = (resourceType) => {
         case 'DiagnosticReport':
         case 'Encounter':
         case 'MedicationAdministration':
-        case 'MedicationOrder':
+        case 'MedicationRequest':
         case 'Observation':
         case 'Organization':
         case 'Patient':
@@ -38,7 +38,7 @@ const defaultProfile = (resourceType) => {
             // for that reason, only apply profiles we know actually exist
             return null;
     }
-}
+};
 
 // FHIRPath supports list membership tests, but not list literals (as far as I can tell).
 // so instead of something nice like "where(code in ['1','2','3'])" we have to do "where(code = '1' or code = '2' or code = '3')"
