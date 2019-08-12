@@ -35,7 +35,7 @@ let buildProcessor = (arg) => {
 // the filter may be a string or a function.  If it is a string it is treated as
 // a fhirpath expression and a filtering function will be built around that expression.
 // if it is a function then it will simply be returned.
-let buildFilter = (arg, context = {}) => {
+let buildFilter = (arg, variables = {}) => {
   // if string create a filter out of it
   if (Array.isArray(arg)){
     let filters = arg.map( f => buildFilter(f));
@@ -44,7 +44,7 @@ let buildFilter = (arg, context = {}) => {
   let filter = null;
   switch (typeof arg) {
     case 'string': {
-      let path = fhirpath.compile(arg, context);
+      let path = fhirpath.compile(arg, variables);
       filter = (resource) => isTrue(path(resource));
       break;}
     case 'function':{
@@ -62,18 +62,18 @@ let buildFilter = (arg, context = {}) => {
 // if the args are a json object with string: object mappings treate the strings as
 // potential filters and or descriptions of the mapper and return an aggregate or filter
 // mapper depending on the rest of the attributes in the json object.
-let buildMappers = (args, context = {}) =>{
+let buildMappers = (args, variables = {}) =>{
   if (!args) {return [];}
   // if the args are an array build an array of mappers to return
   if (Array.isArray(args)){
-    return args.map(m => buildMappers(m, context));
+    return args.map(m => buildMappers(m, variables));
   }
   // if the args are an object and it has a property called mappers
   // treat it like an aggregate mapper else like a filter mapper
   if (args.mappers){
-    return new AggregateMapper(args, context);
+    return new AggregateMapper(args, variables);
   } else if (args.exec){
-    return new FilterMapper(args, context);
+    return new FilterMapper(args, variables);
   } else { // treat this like an object mapping of  {"filter" : {mapping attributes}}
     let mappers = [];
     for (var filter in args){
@@ -85,7 +85,7 @@ let buildMappers = (args, context = {}) =>{
       } else {
         if (!mapper.filter){ mapper.filter = filter;}
         if (!mapper.description){mapper.description = filter;}
-        mappers.push(buildMappers(mapper, context));
+        mappers.push(buildMappers(mapper, variables));
       }
     }
     return mappers;
@@ -97,13 +97,13 @@ let buildMappers = (args, context = {}) =>{
 // mapper.  This class can contain other aggregate mappers.
 class AggregateMapper {
 
-  constructor(args, context = {}){
+  constructor(args, variables = {}){
     this.args = args;
-    this.filterFn = buildFilter(args.filter, context);
+    this.filterFn = buildFilter(args.filter, variables);
     this.defaultFn = buildProcessor(args.default);
-    this.ignoreFn = buildFilter(args.ignore, context);
-    this.excludeFn = buildFilter(args.exclude, context);
-    this.mappers = buildMappers(args.mappers, context);
+    this.ignoreFn = buildFilter(args.ignore, variables);
+    this.excludeFn = buildFilter(args.exclude, variables);
+    this.mappers = buildMappers(args.mappers, variables);
   }
 
   // if an ignore filter was provided execute it on the resource otherwise
@@ -165,9 +165,9 @@ class AggregateMapper {
 // aggregate mapper and an exec function that will modify the resource.
 class FilterMapper {
 
-  constructor(args, context){
+  constructor(args, variables){
     this.args = args;
-    this.filterFn = buildFilter(args.filter, context);
+    this.filterFn = buildFilter(args.filter, variables);
     this.execfn = buildProcessor(args.exec);
   }
 

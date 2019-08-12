@@ -70,7 +70,7 @@ describe('Mapping Tests', () => {
 
   test('should be able to create a filterMapper with a context', () => {
     let buildFilterMappers = mapping.__get__('buildMappers');
-    let filterJson = {filter: 'Condition.code.coding.code in %codes.first()',
+    let filterJson = {filter: 'Condition.code.coding.where($this.code in %codes.first())',
                       exec: (resource) => {
                         resource.mapped = 'Its Mapped';
                         return resource;
