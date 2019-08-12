@@ -42,7 +42,7 @@ const defaultProfile = (resourceType) => {
 
 // FHIRPath supports list membership tests, but not list literals (as far as I can tell).
 // so instead of something nice like "where(code in ['1','2','3'])" we have to do "where(code = '1' or code = '2' or code = '3')"
-const listContains = (list, variableName, addQuotes = false) => {
+const listContains = (list, variableName, addQuotes = true) => {
     if (addQuotes) {
         list = list.map(e => `'${e}'`);
     }
