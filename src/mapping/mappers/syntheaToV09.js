@@ -1,17 +1,25 @@
 const { buildMappers } = require('../mapper');
-
-const applyProfile = (resource, profile) => {
-    if (profile) {
-        resource.meta = resource.meta || {};
-        resource.meta.profile = resource.meta.profile || [];
-        resource.meta.profile.unshift(profile); // put this profile first in the list
-    }
-    return resource;
-};
+const { applyProfile, addExtension } = require('../../utils');
+const fhirpath = require('fhirpath');
+const _ = require('lodash');
 
 const applyProfileFunction = (profile) => {
     // return an anonymous function wrapper to apply this specific profile to given resources
-    return (resource) => applyProfile(resource, profile);
+    return (resource, _context) => applyProfile(resource, profile);
+};
+
+// FHIRPath helper. FHIRPath tends to return things that are JS truthy (like empty arrays)
+// when we would expect a null or other falsy value instead
+// TODO: reference the same function here and in mapper
+const isTrue = (arg) => {
+  if (Array.isArray(arg) ){
+    return arg.find(i => isTrue(i));
+  } else if (typeof arg === 'object'){
+    return !_.isEmpty(arg);
+  } else if (typeof arg === 'string' && arg === 'false'){
+    return false;
+  }
+  return arg;
 };
 
 const defaultProfile = (resourceType) => {
@@ -100,11 +108,94 @@ const TUMOR_MARKER_TEST_CODES = [
     '2857-1', // Prostate specific Ag [Mass/volume] in Serum or Plasma (P)
 ];
 
+const PRIMARY_CANCER_CONDITION_FILTER = `Condition.code.coding.where(${listContains(PRIMARY_CANCER_CONDITION_CODES, '$this.code')})`;
+const PRIMARY_CANCER_CONDITION_PATH = fhirpath.compile(PRIMARY_CANCER_CONDITION_FILTER);
 
+// specific instance of the "find" function with a precompiled fhirpath, possibly a premature optimization but things are already slow on IE
+const findPrimaryCancerCondition = (context, resource = null) => {
+    if (typeof context === 'object' && context.entry) {
+        // extract the entries from the bundle
+        context = context.entry.map(e => e.resource);
+        // otherwise assume it's an array of resources anyway
+    }
+
+    const primaryCancers = context.filter(  r => isTrue( PRIMARY_CANCER_CONDITION_PATH(r) )  );
+
+    if (primaryCancers.length === 0) {
+        return null;
+    }
+
+    // TODO: use timestamps to figure out which one, if there are multiple
+    return primaryCancers[0];
+};
+
+const find = (context, path, options={}) => {
+     if (typeof context === 'object' && context.entry) {
+        // extract the entries from the bundle
+        context = context.entry.map(e => e.resource);
+        // otherwise assume it's an array of resources anyway
+    }
+
+    if (typeof path === 'string') {
+        path = fhirpath.compile(path);
+    }
+
+    const results = context.filter(  r => isTrue( path(r) )  );
+    if (results.length === 0) {
+        return null;
+    }
+
+    // TODO: use options to figure out which one, if there are multiple
+    return results[0];
+};
+
+const addCancerReferenceExtension = (resource, context, url) => {
+    const primaryCancer = findPrimaryCancerCondition(context, resource);
+    if (primaryCancer) {
+        const extension = {
+            url: url,
+            valueReference: {
+                reference: `Condition/${primaryCancer.id}`
+            }
+        };
+
+        addExtension(resource, extension);
+    }
+};
+
+const addRelatedCancerConditionExtension = (resource, context) => 
+    addCancerReferenceExtension(resource, context, 'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/onco-core-RelatedCancerCondition-extension');
+
+const addCancerReasonReferenceExtension = (resource, context) =>
+    addCancerReferenceExtension(resource, context, 'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/onco-core-CancerReasonReference-extension');
+
+
+const addStageGroupRelated = (resource, context, path) => {
+    const relatedItem = find(context, path);
+
+    if (relatedItem) {
+        resource.related.push({ target: { reference: `Observation/${relatedItem.id}` } });
+    }
+};
+
+const nthWord = (string, index) => {
+    return string.split(' ')[index];
+};
+
+const stripParens = (string) => {
+    // remove any parenthetical code type from the end of a SNOMED code
+    // ex, "Improving (qualifier value)" -> "Improving"
+
+    const endIndex = string.lastIndexOf('(');
+
+    if (endIndex === -1) return string;
+
+    return string.slice(0, endIndex - 1); // endIndex - 1 because there's an extra space at the end too
+};
 
 const resourceMapping = {
     filter: () => true,
-    default: (resource) => applyProfile(resource, defaultProfile(resource.resourceType)),
+    default: (resource, _context) => applyProfile(resource, defaultProfile(resource.resourceType)),
     mappers: [
         {
             filter: "Observation.code.coding.where($this.code = '55284-4')",
@@ -120,18 +211,38 @@ const resourceMapping = {
         },
         {
             filter: "Observation.code.coding.where($this.code = '88040-1')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerDiseaseStatus')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerDiseaseStatus');
+
+                addRelatedCancerConditionExtension(resource, context);
+
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = stripParens(resource.valueCodeableConcept.coding[0].display);
+
+                return resource;
+            }
         },
         {
             filter: `Procedure.code.coding.where(${listContains(RADIATION_CODES, '$this.code')})`,
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedRadiationProcedure')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedRadiationProcedure');
+
+                addCancerReasonReferenceExtension(resource, context);
+
+                return resource;
+            }
         },
         {
             filter: `Procedure.code.coding.where(${listContains(SURGERY_CODES, '$this.code')})`,
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedSurgicalProcedure')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedSurgicalProcedure');
+
+                addCancerReasonReferenceExtension(resource, context);
+
+                return resource;
+            }
         },
         {
-            filter: `Condition.code.coding.where(${listContains(PRIMARY_CANCER_CONDITION_CODES, '$this.code')})`,
+            filter: PRIMARY_CANCER_CONDITION_FILTER,
             exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-PrimaryCancerCondition')
         },
         // { // All cancers in Synthea are intended to be primary, even if secondary codes are used
@@ -140,39 +251,127 @@ const resourceMapping = {
         // },
         {
             filter: "Observation.code.coding.where($this.code = '21907-1')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalDistantMetastasesCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalDistantMetastasesCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21905-5')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalPrimaryTumorCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalPrimaryTumorCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21906-3')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalRegionalNodesCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalRegionalNodesCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21908-9')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalStageGroup')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalStageGroup');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the second word of the code. ex "Stage 1A (qualifier value)" -> "1A"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 1);
+
+                // find the 3 components and add them to related
+                resource.related = resource.related || [];
+
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21905-5')"); // primary tumor
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21906-3')"); // regional nodes
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21907-1')"); // distant metastases
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21901-4')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicDistantMetastasesCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicDistantMetastasesCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21899-0')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicPrimaryTumorCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicPrimaryTumorCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21900-6')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicRegionalNodesCategory')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicRegionalNodesCategory');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
+
+                return resource;
+            }
         },
         {
             filter: "Observation.code.coding.where($this.code = '21902-2')",
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicStageGroup')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicStageGroup');
+                addRelatedCancerConditionExtension(resource, context);
+
+                // keep only the second word of the code. ex "Stage 1A (qualifier value)" -> "1A"
+                resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = nthWord(resource.valueCodeableConcept.coding[0].display, 1);
+
+
+                // find the 3 components and add them to related
+                resource.related = resource.related || [];
+
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21899-0')"); // primary tumor
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21900-6')"); // regional nodes
+                addStageGroupRelated(resource, context, "Observation.code.coding.where($this.code = '21901-4')"); // distant metastases
+
+                return resource;
+            }
         },
         {
             filter: `Observation.code.coding.where(${listContains(TUMOR_MARKER_TEST_CODES, '$this.code')})`,
-            exec: applyProfileFunction('http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TumorMarkerTest')
+            exec: (resource, context) => {
+                applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TumorMarkerTest');
+
+                // strip "(qualifier value)" from all +/- results
+                if (resource.valueCodeableConcept) {
+                    resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = stripParens(resource.valueCodeableConcept.coding[0].display);
+                }
+
+                return resource;
+            }
         }
     ]
 };

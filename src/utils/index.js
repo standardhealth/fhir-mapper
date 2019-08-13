@@ -7,4 +7,9 @@ const applyProfile = (resource, profile) => {
     return resource;
 };
 
-module.exports = {applyProfile};
+const addExtension = (resource, newExtension) => {
+  resource.extension = resource.extension || [];
+  resource.extension.push(newExtension);
+};
+
+module.exports = {applyProfile, addExtension};
