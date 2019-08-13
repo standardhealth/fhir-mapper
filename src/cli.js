@@ -1,7 +1,7 @@
 const fs = require('fs');
 const program = require('commander');
 const path = require('path');
-const mappings = require('.');
+const fhirMapper = require('.');
 
 let input, output, mapper;
 
@@ -15,11 +15,11 @@ program
     })
     .parse(process.argv);
 
-if (!mappings[mapper]) {
+if (!fhirMapper.mappers[mapper]) {
     throw new Error(`Unknown mapper name: ${mapper}`);
 }
 
-mapper = mappings[mapper];
+mapper = fhirMapper.mappers[mapper];
 
 if (!fs.existsSync(input)) {
     throw new Error(`Input file does not exist: ${input}`);
