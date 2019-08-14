@@ -40,7 +40,6 @@ const defaultProfile = (resourceType) => {
         case 'Procedure':
             return `http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-${resourceType}`;
 
-
         default:
             // notable resourceTypes used in Synthea that do not have an SHR profile: CarePlan, Goal, Claim, Immunization, ImagingStudy
             // for that reason, only apply profiles we know actually exist
@@ -48,68 +47,62 @@ const defaultProfile = (resourceType) => {
     }
 };
 
-// FHIRPath supports list membership tests, but not list literals (as far as I can tell).
-// so instead of something nice like "where(code in ['1','2','3'])" we have to do "where(code = '1' or code = '2' or code = '3')"
-const listContains = (list, variableName, addQuotes = true) => {
-    if (addQuotes) {
-        list = list.map(e => `'${e}'`);
-    }
-    return list.map(e => `${variableName} = ${e}`).join(' or ');
-};
-
-
 // codes are listed with the modules they are used in
 // (B) = Breast Cancer, (C) = Colorectal, (L) = Lung, (P) = Prostate
+const fhirPathVariables = {
+    primaryCancerConditionCodes: [
+        '254837009', // Malignant neoplasm of breast (disorder) (B)
+        '93761005', // Primary malignant neoplasm of colon (C)
+        '109838007', // Overlapping malignant neoplasm of colon (C)
+        '363406005', // Malignant tumor of colon (C)
+        '94260004', // Secondary malignant neoplasm of colon (C) -- note this is a "secondary" code but is intended to be a primary cancer
+        '254637007', // Non-small cell lung cancer (disorder) (L)
+        '254632001', // Small cell carcinoma of lung (disorder) (L)
+        '424132000', // Non-small cell carcinoma of lung, TNM stage 1 (disorder) (L)
+        '425048006', // Non-small cell carcinoma of lung, TNM stage 2 (disorder) (L)
+        '422968005', // Non-small cell carcinoma of lung, TNM stage 3 (disorder) (L)
+        '423121009', // Non-small cell carcinoma of lung, TNM stage 4 (disorder) (L)
+        '67811000119102', // Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder) (L)
+        '67821000119109', // Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder) (L)
+        '67831000119107', // Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder) (L)
+        '67841000119103', // Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder) (L)
+        // note that none of the 3 prostate cancer codes are in the recommended VS
+        '126906006', // Neoplasm of prostate (P)
+        '92691004', // Carcinoma in situ of prostate (disorder) (P)
+        '314994000', // Metastasis from malignant tumor of prostate (disorder) (P) -- also a "secondary" code but intended to be a primary cancer
+    ],
 
-const PRIMARY_CANCER_CONDITION_CODES = [
-    '254837009', // Malignant neoplasm of breast (disorder) (B)
-    '93761005', // Primary malignant neoplasm of colon (C)
-    '109838007', // Overlapping malignant neoplasm of colon (C)
-    '363406005', // Malignant tumor of colon (C)
-    '94260004', // Secondary malignant neoplasm of colon (C) -- note this is a "secondary" code but is intended to be a primary cancer
-    '254637007', // Non-small cell lung cancer (disorder) (L)
-    '254632001', // Small cell carcinoma of lung (disorder) (L)
-    '424132000', // Non-small cell carcinoma of lung, TNM stage 1 (disorder) (L)
-    '425048006', // Non-small cell carcinoma of lung, TNM stage 2 (disorder) (L)
-    '422968005', // Non-small cell carcinoma of lung, TNM stage 3 (disorder) (L)
-    '423121009', // Non-small cell carcinoma of lung, TNM stage 4 (disorder) (L)
-    '67811000119102', // Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder) (L)
-    '67821000119109', // Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder) (L)
-    '67831000119107', // Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder) (L)
-    '67841000119103', // Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder) (L)
-    // note that none of the 3 prostate cancer codes are in the recommended VS
-    '126906006', // Neoplasm of prostate (P)
-    '92691004', // Carcinoma in situ of prostate (disorder) (P)
-    '314994000', // Metastasis from malignant tumor of prostate (disorder) (P) -- also a "secondary" code but intended to be a primary cancer
-];
-const SURGERY_CODES = [
-    '396487001', // Sentinel lymph node biopsy (procedure) (B)
-    '443497002', // Excision of sentinel lymph node (procedure) (B)
-    '234262008', // Excision of axillary lymph node (procedure) (B)
-    '392021009', // Lumpectomy of breast (procedure) (B)
-    '69031006', // Excision of breast tissue (procedure) (B)
-    '387607004', // Construction of diverting colostomy (B)
-    '43075005', // Partial resection of colon (B)
-    '90470006', // Prostatectomy (P)
-];
-const RADIATION_CODES = [
-    '447759004', // Brachytherapy of breast (procedure) (B)
-    '384692006', // Intracavitary brachytherapy (procedure) (B)
-    '113120007', // Interstitial brachytherapy (procedure) (B)
-    '33195004', // Teleradiotherapy procedure (procedure) (B)
-    '385798007', // Radiation therapy care (regime/therapy) (B)
-    '108290001', // Radiation oncology AND/OR radiotherapy (procedure) (B)
-];
-const TUMOR_MARKER_TEST_CODES = [
-    '85319-2', // HER2 [Presence] in Breast cancer specimen by Immune stain (B)
-    '85318-4', // HER2 [Presence] in Breast cancer specimen by FISH (B)
-    '85337-4', // Estrogen receptor Ag [Presence] in Breast cancer specimen by Immune stain (B)
-    '85339-0', // Progesterone receptor Ag [Presence] in Breast cancer specimen by Immune stain (B)
-    '2857-1', // Prostate specific Ag [Mass/volume] in Serum or Plasma (P)
-];
+    surgeryCodes: [
+        '396487001', // Sentinel lymph node biopsy (procedure) (B)
+        '443497002', // Excision of sentinel lymph node (procedure) (B)
+        '234262008', // Excision of axillary lymph node (procedure) (B)
+        '392021009', // Lumpectomy of breast (procedure) (B)
+        '69031006', // Excision of breast tissue (procedure) (B)
+        '387607004', // Construction of diverting colostomy (B)
+        '43075005', // Partial resection of colon (B)
+        '90470006', // Prostatectomy (P)
+    ],
 
-const PRIMARY_CANCER_CONDITION_FILTER = `Condition.code.coding.where(${listContains(PRIMARY_CANCER_CONDITION_CODES, '$this.code')})`;
-const PRIMARY_CANCER_CONDITION_PATH = fhirpath.compile(PRIMARY_CANCER_CONDITION_FILTER);
+    radiationCodes: [
+        '447759004', // Brachytherapy of breast (procedure) (B)
+        '384692006', // Intracavitary brachytherapy (procedure) (B)
+        '113120007', // Interstitial brachytherapy (procedure) (B)
+        '33195004', // Teleradiotherapy procedure (procedure) (B)
+        '385798007', // Radiation therapy care (regime/therapy) (B)
+        '108290001', // Radiation oncology AND/OR radiotherapy (procedure) (B)
+    ],
+
+    tumorMarkerTestCodes: [
+        '85319-2', // HER2 [Presence] in Breast cancer specimen by Immune stain (B)
+        '85318-4', // HER2 [Presence] in Breast cancer specimen by FISH (B)
+        '85337-4', // Estrogen receptor Ag [Presence] in Breast cancer specimen by Immune stain (B)
+        '85339-0', // Progesterone receptor Ag [Presence] in Breast cancer specimen by Immune stain (B)
+        '2857-1', // Prostate specific Ag [Mass/volume] in Serum or Plasma (P)
+    ]
+};
+
+const PRIMARY_CANCER_CONDITION_FILTER = 'Condition.code.coding.where($this.code in %primaryCancerConditionCodes)';
+const PRIMARY_CANCER_CONDITION_PATH = fhirpath.compile(PRIMARY_CANCER_CONDITION_FILTER, fhirPathVariables);
 
 // specific instance of the "find" function with a precompiled fhirpath, possibly a premature optimization but things are already slow on IE
 const findPrimaryCancerCondition = (context, resource = null) => {
@@ -222,7 +215,7 @@ const resourceMapping = {
             }
         },
         {
-            filter: `Procedure.code.coding.where(${listContains(RADIATION_CODES, '$this.code')})`,
+            filter: 'Procedure.code.coding.where($this.code in %radiationCodes)',
             exec: (resource, context) => {
                 applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedRadiationProcedure');
 
@@ -232,7 +225,7 @@ const resourceMapping = {
             }
         },
         {
-            filter: `Procedure.code.coding.where(${listContains(SURGERY_CODES, '$this.code')})`,
+            filter: 'Procedure.code.coding.where($this.code in %surgeryCodes)',
             exec: (resource, context) => {
                 applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedSurgicalProcedure');
 
@@ -361,7 +354,7 @@ const resourceMapping = {
             }
         },
         {
-            filter: `Observation.code.coding.where(${listContains(TUMOR_MARKER_TEST_CODES, '$this.code')})`,
+            filter: 'Observation.code.coding.where($this.code in %tumorMarkerTestCodes)',
             exec: (resource, context) => {
                 applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TumorMarkerTest');
 
@@ -376,4 +369,5 @@ const resourceMapping = {
     ]
 };
 
-module.exports = buildMappers(resourceMapping);
+
+module.exports = buildMappers(resourceMapping, fhirPathVariables);
