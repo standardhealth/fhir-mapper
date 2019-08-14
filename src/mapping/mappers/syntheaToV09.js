@@ -358,6 +358,24 @@ const resourceMapping = {
             exec: (resource, context) => {
                 applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TumorMarkerTest');
 
+                // replace the raw code with an interpreted code
+                const code = resource.code.coding[0].code;
+
+                switch (code) {
+                    case '85319-2': // HER2
+                        resource.code.text = 'HER2 Receptor';
+                        resource.code.coding.unshift({ system: 'LOINC', code: '48676-1', display: 'HER2 [Interpretation] in Tissue' });
+                        break;
+                    case '85337-4': // ER
+                        resource.code.text = 'Estrogen Receptor';
+                        resource.code.coding.unshift({ system: 'LOINC', code: '16112-5', display: 'Estrogen receptor [Interpretation] in Tissue' });
+                        break;
+                    case '85339-0': // PR
+                        resource.code.text = 'Progesterone Receptor';
+                        resource.code.coding.unshift({ system: 'LOINC', code: '16113-3', display: 'Progesterone receptor [Interpretation] in Tissue' })
+                        break;
+                }
+
                 // strip "(qualifier value)" from all +/- results
                 if (resource.valueCodeableConcept) {
                     resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = stripParens(resource.valueCodeableConcept.coding[0].display);
