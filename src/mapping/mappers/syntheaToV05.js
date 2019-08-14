@@ -1,13 +1,5 @@
 const { buildMappers } = require('../mapper');
-
-const applyProfile = (resource, profile) => {
-    if (profile) {
-        resource.meta = resource.meta || {};
-        resource.meta.profile = resource.meta.profile || [];
-        resource.meta.profile.unshift(profile); // ensure this profile is first in the list
-    }
-    return resource;
-};
+const {applyProfile} = require('../../utils');
 
 const DEFAULT_PROFILE = {
     'Patient': 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/shr-entity-Patient',
