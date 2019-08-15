@@ -9,7 +9,8 @@
     "test:lint": "eslint \"src/**/*.js\"",
     "test" : "jest --forceExit",
     "webpack": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "map": "node src/cli.js"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",

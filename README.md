@@ -4,6 +4,7 @@ Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto
 
 ## Current Mappers
 * Synthea FHIR => mCODE v0.5 (`src/mappers/syntheaToV05.js`)
+* Synthea FHIR => mCODE v0.9 (`src/mappers/syntheaToV09.js`)
 
 ## Quickstart
 
@@ -115,3 +116,29 @@ yourNewMapper.execute(resources) // resources is an array of entries
 ### Linting
 
 Before pushing a new mapper, ensure that there are no eslint errors by running the linter: `yarn test:lint`
+
+### Standalone Usage
+
+To apply mappings to a file standalone, a CLI option is included. 
+
+Usage:
+```
+> yarn map <mapper> <input> <output>
+```
+Where:
+ - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `syntheaToV05`
+ - *input* - The path to a single FHIR JSON file or folder containing multiple FHIR JSON files to process.
+ - *output* - The location to put the mapped file. If *input* is a folder, *output* should be a folder. Each processed file will have the same name as the unprocessed file in the output folder. *output* may be a single filename if *input* is a single filename.
+
+ All three parameters are required.
+
+ Sample:
+
+ ```
+$ yarn map syntheaToV09 ~/synthea/output/fhir_dstu2/ output
+Processing ~/synthea/output/fhir_dstu2/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
+Wrote output/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
+Processing ~/synthea/output/fhir_dstu2/Aaron697_Lind531_9a572c87-2074-4263-9be5-281f55ee0e90.json
+Wrote output/Aaron697_Lind531_9a572c87-2074-4263-9be5-281f55ee0e90.json
+Processing ...
+ ```
