@@ -1,13 +1,13 @@
 {
   "name": "fhir-mapper",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/app.bundle.js",
   "repository": "git@github.com:standardhealth/fhir-mapper.git",
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
   "license": "MIT",
   "scripts": {
     "test:lint": "eslint \"src/**/*.js\"",
-    "test" : "jest --forceExit",
+    "test": "jest --forceExit",
     "webpack": "webpack",
     "watch": "webpack --watch",
     "map": "node src/cli.js"
@@ -17,9 +17,9 @@
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.3.4",
     "babel-loader": "^8.0.5",
+    "eslint": "^5.15.1",
     "jest": "^24.8.0",
     "rewire": "4.0.1",
-    "eslint": "^5.15.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
   },
