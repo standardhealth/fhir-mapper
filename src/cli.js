@@ -28,7 +28,6 @@ if (!fs.existsSync(input)) {
 const processFile = (file, outfile) => {
     const fileContent = fs.readFileSync(file, 'utf8');
     const patient = JSON.parse(fileContent);
-
     const processedPatient = mapper.execute(patient, patient);
     const processedPatientJson = JSON.stringify(processedPatient, null, 2);
 

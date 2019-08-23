@@ -1,18 +1,5 @@
 const fhirpath = require('fhirpath');
-const _ = require('lodash');
-// embdedded function to inspect the results of fhir path calls to tell if something
-// returned an object or 'true'.  This is used to wrap the filter/ignore/exclude
-// functions to dtermin the truthyness of the fhir path calls
-let isTrue = (arg) => {
-  if (Array.isArray(arg) ){
-    return arg.find(i => isTrue(i));
-  } else if (typeof arg === 'object'){
-    return !_.isEmpty(arg);
-  } else if (typeof arg === 'string' && arg === 'false'){
-    return false;
-  }
-  return arg;
-};
+const {isTrue} = require('../utils/common');
 
 // function to build the exec methods for FilterMappers.  The exec function modifies
 // the resource.  If the value is a string it will try to require the function else {
