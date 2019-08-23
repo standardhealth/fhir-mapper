@@ -6,7 +6,7 @@ const {find, addExtension, isTrue} = require('./common');
 // (B) = Breast Cancer, (C) = Colorectal, (L) = Lung, (P) = Prostate
 const fhirPathVariables = {
   primaryCancerConditionCodes: [
-       '188151006',
+      '188151006', // Malignant neoplasm of central part of female breast (disorder),
       '254837009', // Malignant neoplasm of breast (disorder) (B)
       '93761005', // Primary malignant neoplasm of colon (C)
       '109838007', // Overlapping malignant neoplasm of colon (C)
