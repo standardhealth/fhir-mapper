@@ -1,5 +1,6 @@
 const fhirpath = require('fhirpath');
 const _ = require('lodash');
+
 const applyProfile = (resource, profile) => {
     if (profile) {
         resource.meta = resource.meta || {};
@@ -18,6 +19,17 @@ const applyProfileFunction = (profile) => {
     // return an anonymous function wrapper to apply this specific profile to given resources
     return (resource, _context) => applyProfile(resource, profile);
 };
+
+const addRelated = (resource, type, from) =>{
+  if(!resource || !type || !from) return
+  resource.related = resource.related || [];
+  resource.related.push({
+    type: type,
+    target: {
+      reference: from.resourceType+"/"+from.id
+    }
+  })
+}
 
 // FHIRPath helper. FHIRPath tends to return things that are JS truthy (like empty arrays)
 // when we would expect a null or other falsy value instead
@@ -41,9 +53,9 @@ const find = (context, path, options = {}) => {
    }
 
    if (typeof path === 'string') {
-       path = fhirpath.compile(path);
+       path = fhirpath.compile(path, options);
    }
-
+   
    const results = context.filter( r => isTrue( path(r) ) );
    if (results.length === 0) {
        return null;
@@ -53,4 +65,4 @@ const find = (context, path, options = {}) => {
    return results[0];
  };
 
-module.exports = {find, applyProfile, addExtension, applyProfileFunction, isTrue};
+module.exports = {find, applyProfile, addExtension, applyProfileFunction, isTrue, addRelated};
