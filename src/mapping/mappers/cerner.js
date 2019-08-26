@@ -46,7 +46,8 @@ let mapper = {
       exec: (resource, context) => {
         resource.code.coding = [{
           code: '16112-5',
-          system: 'http://loinc.org'
+          system: 'http://loinc.org',
+          display: 'Estrogen receptor [Interpretation] in Tissue'
         }];
 
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TumorMarkerTest');
@@ -58,7 +59,8 @@ let mapper = {
       exec: (resource, context) => {
         resource.code.coding = [{
           code: '16113-3',
-          system: 'http://loinc.org'
+          system: 'http://loinc.org',
+          display:  'Progesterone receptor [Interpretation] in Tissue'
         }];
 
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TumorMarkerTest');
@@ -69,7 +71,8 @@ let mapper = {
       exec: (resource, context) => {
         resource.code.coding = [{
           code: '48676-1',
-          system: 'http://loinc.org'
+          system: 'http://loinc.org',
+          display: 'HER2 [Interpretation] in Tissue'
         }];
 
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TumorMarkerTest');
