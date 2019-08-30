@@ -1,9 +1,9 @@
 const {
   buildMappers
 } = require('../mapper');
-const utils = require('../../utils/common');
-const mcodeUtils09 = require('../../utils/mcodeUtils09');
+const utils = require('../../utils');
 const syntheaToV09 = require('./syntheaToV09');
+const mcodeUtils09 = utils.mcodeUtils09;
 
 let vars = {
   pStageCodes: [ 'AJCCV8 MAG-PRO P Stage', 'AJCCV8 BRE-INV P Stage'],

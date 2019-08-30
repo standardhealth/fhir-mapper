@@ -1,5 +1,5 @@
 const { buildMappers } = require('../mapper');
-const {applyProfile} = require('../../utils/common');
+const {applyProfile} = require('../../utils');
 
 const DEFAULT_PROFILE = {
     'Patient': 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/shr-entity-Patient',

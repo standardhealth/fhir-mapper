@@ -1,7 +1,5 @@
 const { buildMappers } = require('../mapper');
-const { applyProfile, applyProfileFunction } = require('../../utils/common');
-const mcodeUtils09 = require('../../utils/mcodeUtils09');
-
+const { applyProfile, applyProfileFunction, hasProfileFromList, mcodeUtils09 } = require('../../utils');
 
 const defaultProfile = (resourceType) => {
     switch (resourceType) {
@@ -28,6 +26,36 @@ const defaultProfile = (resourceType) => {
     }
 };
 
+const allRelevantProfiles = [
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-AllergyIntolerance',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Condition',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-DiagnosticReport',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Encounter',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-MedicationAdministration',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-MedicationRequest',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Observation',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Organization',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Patient',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Practitioner',
+    'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Procedure',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/shr-core-BloodPressure',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/shr-core-BodyHeight',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/shr-core-BodyWeight',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerDiseaseStatus',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedRadiationProcedure',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedSurgicalProcedure',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-PrimaryCancerCondition',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-SecondaryCancerCondition',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalDistantMetastasesCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalPrimaryTumorCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalRegionalNodesCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalStageGroup',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicDistantMetastasesCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicPrimaryTumorCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicRegionalNodesCategory',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicStageGroup',
+    'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TumorMarkerTest'
+];
 
 const nthWord = (string, index) => {
     return string.split(' ')[index];
@@ -46,6 +74,7 @@ const stripParens = (string) => {
 
 const resourceMapping = {
     filter: () => true,
+    ignore: (resource) => hasProfileFromList(resource, allRelevantProfiles),
     default: (resource, _context) => applyProfile(resource, defaultProfile(resource.resourceType)),
     mappers: [
         {
