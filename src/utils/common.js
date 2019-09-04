@@ -15,6 +15,15 @@ const addExtension = (resource, newExtension) => {
   resource.extension.push(newExtension);
 };
 
+const hasProfileFromList = (resource, profiles) => {
+  // ignore resources that already have mCODE profiles. we will assume they are profiled correctly
+  if (!resource || !resource.meta || !resource.meta.profile) {
+      return false; // i.e., do not ignore this since it has no profiles
+  }
+  // check if any of the profiles are mcode. returns null (falsy) if none found or the profile itself (truthy)
+  return resource.meta.profile.find(p => profiles.includes(p));
+}
+
 const applyProfileFunction = (profile) => {
     // return an anonymous function wrapper to apply this specific profile to given resources
     return (resource, _context) => applyProfile(resource, profile);
@@ -65,4 +74,4 @@ const find = (context, path, options = {}) => {
    return results[0];
  };
 
-module.exports = {find, applyProfile, addExtension, applyProfileFunction, isTrue, addRelated};
+module.exports = {find, applyProfile, addExtension, hasProfileFromList, applyProfileFunction, isTrue, addRelated};
