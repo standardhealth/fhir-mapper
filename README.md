@@ -3,8 +3,9 @@
 Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto the incoming FHIR. 
 
 ## Current Mappers
-* Synthea FHIR => mCODE v0.5 (`src/mappers/syntheaToV05.js`)
-* Synthea FHIR => mCODE v0.9 (`src/mappers/syntheaToV09.js`)
+* Synthea FHIR => mCODE v0.5 (`src/mappers/SyntheaToV05.js`)
+* Synthea FHIR => mCODE v0.9 (`src/mappers/SyntheaToV09.js`)
+* Cerner Sandbox => mCODE v0.9 (`src/mappers/Cerner.js`)
 
 ## Quickstart
 
@@ -17,13 +18,15 @@ $ yarn add fhir-mapper
 In the file where the mapping needs to be done, import one of the supported mappers (e.g. Synthea) directly into the project. Here is an example of utilizing the Synthea mapper to add mCODE v0.5 profiles onto Synthea FHIR:
 
 ``` JavaScript
-import { syntheaToV05 } from 'fhir-mapper';
+import SyntheaToV09 from 'fhir-mapper';
+
+const mapper = new SyntheaToV09();
 
 const json = {/* obtained Synthea FHIR json */};
 const entries = [];
 
 const resources = json.entry.map(e => e.resource);
-const results = syntheaToV05.execute(resources);
+const results = mapper.execute(resources);
 const wrappedResults = results.map(resource => {
     return {
         fullUrl: `urn:uuid:${resource.id}`,
@@ -64,7 +67,7 @@ Create the new mapper in `src/mapping/mappers/<your-mapper>.js` and import the m
 ``` JavaScript
 /* src/mapping/mappers/<your-mapper>.js */
 
-const { buildMappers } = require('../mapper');
+const { AggregateMapper } = require('../mapper');
 
 const applyProfile = (resource, profile) => {
     if (profile) {
@@ -89,18 +92,22 @@ const resourceMapping = {
     ]
 };
 
-module.exports = buildMappers(resourceMapping);
+export default class YourNewMapper extends AggregateMapper {
+    constructor(variables = {}) {
+        super(resourceMapping, variables);
+    }
+}
 ```
 
 Lastly, add the new mapper to be exported by `src/mapping/mappers/index.js`:
 
 ``` JavaScript
-const syntheaToV05 = require('./syntheaToV05');
-const yourNewMapper = require('./<your-mapper>.js'); // want to export new mapper to use in project
+const SyntheaToV05 = require('./syntheaToV05');
+const YourNewMapper = require('./<your-mapper>.js'); // want to export new mapper to use in project
 
 module.exports = {
-    syntheaToV05,
-    yourNewMapper
+    SyntheaToV05,
+    YourNewMapper
 };
 ```
 
@@ -126,7 +133,7 @@ Usage:
 > yarn map <mapper> <input> <output>
 ```
 Where:
- - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `syntheaToV05`
+ - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `SyntheaToV05`
  - *input* - The path to a single FHIR JSON file or folder containing multiple FHIR JSON files to process.
  - *output* - The location to put the mapped file. If *input* is a folder, *output* should be a folder. Each processed file will have the same name as the unprocessed file in the output folder. *output* may be a single filename if *input* is a single filename.
 
@@ -135,7 +142,7 @@ Where:
  Sample:
 
  ```
-$ yarn map syntheaToV09 ~/synthea/output/fhir_dstu2/ output
+$ yarn map SyntheaToV09 ~/synthea/output/fhir_dstu2/ output
 Processing ~/synthea/output/fhir_dstu2/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
 Wrote output/Aaron697_Corwin846_e97aaf5b-609c-4147-bf6f-921f45966f72.json
 Processing ~/synthea/output/fhir_dstu2/Aaron697_Lind531_9a572c87-2074-4263-9be5-281f55ee0e90.json

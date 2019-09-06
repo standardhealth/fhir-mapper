@@ -36,8 +36,10 @@ const resourceMapping = {
     ]
 };
 
-export default class SyntheaToV05 extends AggregateMapper {
+class SyntheaToV05 extends AggregateMapper {
     constructor(variables = {}) {
         super(resourceMapping, variables);
     }
 }
+
+module.exports = SyntheaToV05;

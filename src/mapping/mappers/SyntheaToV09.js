@@ -274,9 +274,10 @@ const resourceMapping = {
     ]
 };
 
-
-export default class SyntheaToV09 extends AggregateMapper {
+class SyntheaToV09 extends AggregateMapper {
     constructor(variables = {}) {
         super(resourceMapping, { ...mcodeUtils09.fhirPathVariables, ...variables });
     }
 }
+
+module.exports = SyntheaToV09;

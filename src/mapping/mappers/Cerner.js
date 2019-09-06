@@ -1,4 +1,4 @@
-import SyntheaToV09 from './SyntheaToV09';
+const SyntheaToV09 = require('./SyntheaToV09');
 const { AggregateMapper } = require('../mapper');
 const utils = require('../../utils');
 const mcodeUtils09 = utils.mcodeUtils09;
@@ -213,11 +213,13 @@ let mapper = {
   ],
 };
 
-export default class Cerner extends AggregateMapper {
+class Cerner extends AggregateMapper {
     constructor(variables = {}) {
         super(mapper, { ...vars, ...variables });
     }
 }
+
+module.exports = Cerner;
 
 
  // {
