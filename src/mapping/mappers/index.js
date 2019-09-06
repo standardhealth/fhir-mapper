@@ -1,8 +1,8 @@
-const syntheaToV05 = require('./syntheaToV05');
-const syntheaToV09 = require('./syntheaToV09');
-const cerner = require('./cerner');
+const SyntheaToV05 = require('./SyntheaToV05').default;
+const SyntheaToV09 = require('./SyntheaToV09').default;
+const Cerner = require('./Cerner').default;
 module.exports = {
-    syntheaToV05,
-    syntheaToV09,
-    cerner
+    SyntheaToV05,
+    SyntheaToV09,
+    Cerner
 };
