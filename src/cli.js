@@ -19,7 +19,9 @@ if (!fhirMapper.mappers[mapper]) {
     throw new Error(`Unknown mapper name: ${mapper}`);
 }
 
-mapper = fhirMapper.mappers[mapper];
+const mapperClass = fhirMapper.mappers[mapper];
+
+mapper = new mapperClass();
 
 if (!fs.existsSync(input)) {
     throw new Error(`Input file does not exist: ${input}`);

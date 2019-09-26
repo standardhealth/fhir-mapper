@@ -1,4 +1,4 @@
-const { buildMappers } = require('../mapper');
+const { AggregateMapper } = require('../mapper');
 const { applyProfile, applyProfileFunction, hasProfileFromList, mcodeUtils09 } = require('../../utils');
 
 const defaultProfile = (resourceType) => {
@@ -274,5 +274,10 @@ const resourceMapping = {
     ]
 };
 
+class SyntheaToV09 extends AggregateMapper {
+    constructor(variables = {}) {
+        super(resourceMapping, { ...mcodeUtils09.fhirPathVariables, ...variables });
+    }
+}
 
-module.exports = buildMappers(resourceMapping, mcodeUtils09.fhirPathVariables);
+module.exports = SyntheaToV09;

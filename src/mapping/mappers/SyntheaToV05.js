@@ -1,4 +1,4 @@
-const { buildMappers } = require('../mapper');
+const { AggregateMapper } = require('../mapper');
 const {applyProfile} = require('../../utils');
 
 const DEFAULT_PROFILE = {
@@ -36,4 +36,10 @@ const resourceMapping = {
     ]
 };
 
-module.exports = buildMappers(resourceMapping);
+class SyntheaToV05 extends AggregateMapper {
+    constructor(variables = {}) {
+        super(resourceMapping, variables);
+    }
+}
+
+module.exports = SyntheaToV05;

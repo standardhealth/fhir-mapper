@@ -1,8 +1,6 @@
-const {
-  buildMappers
-} = require('../mapper');
+const SyntheaToV09 = require('./SyntheaToV09');
+const { AggregateMapper } = require('../mapper');
 const utils = require('../../utils');
-const syntheaToV09 = require('./syntheaToV09');
 const mcodeUtils09 = utils.mcodeUtils09;
 
 let vars = {
@@ -36,9 +34,11 @@ let clinicalTPath = "Observation.code.text in %cTCodes"
 let clinicalNPath = "Observation.code.text in %cNCodes"
 let clinicalMPath = "Observation.code.text in %cMCodes"
 
+const baseDefaultMapper = new SyntheaToV09();
+
 let mapper = {
   filter: () => true,
-  default: (resource, context) => syntheaToV09.execute(resource, context),
+  default: (resource, context) => baseDefaultMapper.execute(resource, context),
   mappers: [
 
     {
@@ -213,9 +213,13 @@ let mapper = {
   ],
 };
 
-module.exports = buildMappers(mapper,
-  vars
-);
+class Cerner extends AggregateMapper {
+    constructor(variables = {}) {
+        super(mapper, { ...vars, ...variables });
+    }
+}
+
+module.exports = Cerner;
 
 
  // {
