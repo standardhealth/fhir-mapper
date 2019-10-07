@@ -9,10 +9,11 @@ const resourceMapping = {
             filter: 'AllergyIntolerance',
             exec: (resource, context) => {
                 if (!resource.substance.coding) {
+                    const text = resource.substance.text || '';
                     resource.substance.coding = [{
-                        code: resource.substance.text,
+                        code: text,
                         system: 'http://snomed.info/sct',
-                        display: resource.substance.text
+                        display: text
                     }];
                 }
 
