@@ -6,7 +6,7 @@ Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto
 * Synthea FHIR => mCODE v0.5 (`src/mappers/SyntheaToV05.js`)
 * Synthea FHIR => mCODE v0.9 (`src/mappers/SyntheaToV09.js`)
 * Cerner Sandbox => mCODE v0.9 (`src/mappers/Cerner.js`)
-* Partners => mCODE v0.9 (`src/mappers/Partners.js`)
+* Open Epic DSTU2 FHIR => mCODE v0.9 (`src/mappers/OpenEpic.js`)
 
 ## Quickstart
 
