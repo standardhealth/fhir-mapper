@@ -1,0 +1,159 @@
+{
+    "resourceType": "Bundle",
+    "entry": [
+        {
+            "fullUrl": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TBwnNbrAqC0Qw5Ha7AFT-2AB",
+            "link": [
+                {
+                    "relation": "self",
+                    "url": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TBwnNbrAqC0Qw5Ha7AFT-2AB"
+                }
+            ],
+            "resource": {
+                "resourceType": "AllergyIntolerance",
+                "recordedDate": "2015-08-24T23:11:36Z",
+                "status": "confirmed",
+                "criticality": "CRITL",
+                "id": "TBwnNbrAqC0Qw5Ha7AFT-2AB",
+                "onset": "2012-11-07T00:00:00Z",
+                "recorder": {
+                    "display": "MOORE, NICK",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Practitioner/TItWfhjChtlo0pFh9nzctSQB"
+                },
+                "patient": {
+                    "display": "Jason Argonaut",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Patient/Tbt3KuCY0B5PSrJvCu2j-PlK.aiHsu2xUjUM8bWpetXoB"
+                },
+                "substance": {
+                    "text": "PENICILLIN G"
+                },
+                "reaction": [
+                    {
+                        "certainty": "confirmed",
+                        "onset": "2012-11-07T00:00:00Z",
+                        "manifestation": [
+                            {
+                                "text": "Hives"
+                            }
+                        ],
+                        "note": {
+                            "text": "Severity low enough to be prescribed if needed."
+                        }
+                    }
+                ],
+                "note": {
+                    "text": "Severity low enough to be prescribed if needed."
+                }
+            },
+            "request": {
+                "method": "PUT",
+                "url": "AllergyIntolerance/TBwnNbrAqC0Qw5Ha7AFT-2AB"
+            }
+        },
+        {
+            "fullUrl": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TPcWiBG2h2E114Vh0sRT8fQB",
+            "link": [
+                {
+                    "relation": "self",
+                    "url": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TPcWiBG2h2E114Vh0sRT8fQB"
+                }
+            ],
+            "resource": {
+                "resourceType": "AllergyIntolerance",
+                "recordedDate": "2015-11-07T20:55:10Z",
+                "status": "confirmed",
+                "criticality": "CRITL",
+                "id": "TPcWiBG2h2E114Vh0sRT8fQB",
+                "onset": "2010-05-02T00:00:00Z",
+                "recorder": {
+                    "display": "MOORE, NICK",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Practitioner/TItWfhjChtlo0pFh9nzctSQB"
+                },
+                "patient": {
+                    "display": "Jason Argonaut",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Patient/Tbt3KuCY0B5PSrJvCu2j-PlK.aiHsu2xUjUM8bWpetXoB"
+                },
+                "substance": {
+                    "text": "SHELLFISH-DERIVED PRODUCTS",
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/ndfrt",
+                            "code": "N0000007624",
+                            "display": "SHELLFISH-DERIVED PRODUCTS"
+                        }
+                    ]
+                },
+                "reaction": [
+                    {
+                        "certainty": "confirmed",
+                        "onset": "2010-05-02T00:00:00Z",
+                        "manifestation": [
+                            {
+                                "text": "Itching"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "AllergyIntolerance/TPcWiBG2h2E114Vh0sRT8fQB"
+            }
+        },
+        {
+            "fullUrl": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TKebKfLXzu6Sp.LY-IpvpmQB",
+            "link": [
+                {
+                    "relation": "self",
+                    "url": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/AllergyIntolerance/TKebKfLXzu6Sp.LY-IpvpmQB"
+                }
+            ],
+            "resource": {
+                "resourceType": "AllergyIntolerance",
+                "recordedDate": "2015-11-07T20:56:34Z",
+                "status": "confirmed",
+                "criticality": "CRITH",
+                "id": "TKebKfLXzu6Sp.LY-IpvpmQB",
+                "onset": "2014-03-07T00:00:00Z",
+                "recorder": {
+                    "display": "MOORE, NICK",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Practitioner/TItWfhjChtlo0pFh9nzctSQB"
+                },
+                "patient": {
+                    "display": "Jason Argonaut",
+                    "reference": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/Patient/Tbt3KuCY0B5PSrJvCu2j-PlK.aiHsu2xUjUM8bWpetXoB"
+                },
+                "substance": {
+                    "text": "STRAWBERRY",
+                    "coding": [
+                        {
+                            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                            "code": "892484",
+                            "display": "STRAWBERRY"
+                        },
+                        {
+                            "system": "http://fdasis.nlm.nih.gov",
+                            "code": "4J2TY8Y81V",
+                            "display": "STRAWBERRY"
+                        }
+                    ]
+                },
+                "reaction": [
+                    {
+                        "certainty": "confirmed",
+                        "onset": "2014-03-07T00:00:00Z",
+                        "manifestation": [
+                            {
+                                "text": "Anaphylaxis"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "request": {
+                "method": "PUT",
+                "url": "AllergyIntolerance/TKebKfLXzu6Sp.LY-IpvpmQB"
+            }
+        }
+    ]
+}
