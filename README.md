@@ -18,28 +18,22 @@ Install into your project via yarn:
 $ yarn add fhir-mapper
 ```
 
-In the file where the mapping needs to be done, import one of the supported mappers (e.g. Synthea) directly into the project. Here is an example of utilizing the Synthea mapper to add mCODE v0.5 profiles onto Synthea FHIR:
+Each mapper class will export a function `execute`, which takes in an array of FHIR resources and applies mapping to each resource.
+
+In the file where the mapping needs to be done, import one of the supported mappers (e.g. Synthea) directly into the project. Here is an example of utilizing the Synthea mapper to add mCODE v0.9 profiles onto Synthea DSTU2 FHIR:
 
 ``` JavaScript
-import SyntheaToV09 from 'fhir-mapper';
+import { mappers } from 'fhir-mapper';
 
+const { SyntheaToV09 } = mappers;
 const mapper = new SyntheaToV09();
 
-const json = {/* obtained Synthea FHIR json */};
-const entries = [];
+const json = {/* a Synthea FHIR Bundle */};
 
 const resources = json.entry.map(e => e.resource);
 const results = mapper.execute(resources);
-const wrappedResults = results.map(resource => {
-    return {
-        fullUrl: `urn:uuid:${resource.id}`,
-        resource,
-        request: { method: 'POST', url: resource.resourceType }
-    }
-});
-json.entry = wrappedResults;
 
-entries.push(...bundle.entry); // Array of entries with mCODE profiles
+// results is now an array of entries from the original Bundle with proper mapping
 ```
 
 ## Local Development
@@ -72,24 +66,14 @@ Create the new mapper in `src/mapping/mappers/<your-mapper>.js` and import the m
 
 const { AggregateMapper } = require('../mapper');
 
-const applyProfile = (resource, profile) => {
-    if (profile) {
-        resource.meta = resource.meta || {};
-        resource.meta.profile = resource.meta.profile || [];
-        resource.meta.profile.unshift(profile); // ensure this profile is first in the list
-    }
-    return resource;
-};
-
-const DEFAULT_PROFILE = { /* some default profile */ };
-
 const resourceMapping = {
     filter: () => true,
-    default: (resource) => applyProfile(resource, DEFAULT_PROFILE[resource.resourceType]),
+    ignore: () => {/* criteria for mapper to ignore */},
+    default: (resource) => {/* default behavior */},
     mappers: [
         {
-            filter: "Some filter expression",
-            exec: (resource) => applyProfile(resource, 'http://example.com/ExampleResource')
+            filter: "<some fhirpath expression>",
+            exec: (resource) => {/* return mapped resource */}
         },
         // other mappers...
     ]
@@ -105,11 +89,12 @@ export default class YourNewMapper extends AggregateMapper {
 Lastly, add the new mapper to be exported by `src/mapping/mappers/index.js`:
 
 ``` JavaScript
-const SyntheaToV05 = require('./syntheaToV05');
+// Other mappers
+// ...
 const YourNewMapper = require('./<your-mapper>.js'); // want to export new mapper to use in project
 
 module.exports = {
-    SyntheaToV05,
+    /* other mappers */
     YourNewMapper
 };
 ```
@@ -125,7 +110,7 @@ yourNewMapper.execute(resources) // resources is an array of entries
 
 ### Linting
 
-Before pushing a new mapper, ensure that there are no eslint errors by running the linter: `yarn test:lint`
+Before pushing a new mapper, ensure that there are no eslint errors by running the linter: `yarn lint`
 
 ### Standalone Usage
 
@@ -133,10 +118,10 @@ To apply mappings to a file standalone, a CLI option is included.
 
 Usage:
 ```
-> yarn map <mapper> <input> <output>
+yarn map <mapper> <input> <output>
 ```
 Where:
- - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `SyntheaToV05`
+ - *mapper* - The name of the mapper to use to map the given files. Must be one of the mappers defined in `src/mapping/mappers/index.js`. Ex: `SyntheaToV09`
  - *input* - The path to a single FHIR JSON file or folder containing multiple FHIR JSON files to process.
  - *output* - The location to put the mapped file. If *input* is a folder, *output* should be a folder. Each processed file will have the same name as the unprocessed file in the output folder. *output* may be a single filename if *input* is a single filename.
 
@@ -152,3 +137,13 @@ Processing ~/synthea/output/fhir_dstu2/Aaron697_Lind531_9a572c87-2074-4263-9be5-
 Wrote output/Aaron697_Lind531_9a572c87-2074-4263-9be5-281f55ee0e90.json
 Processing ...
  ```
+ 
+ ### Generating JavaScript for Web Apps
+ 
+ If you are doing local development of `fhir-mapper` for a web app, you will need to use Webpack to bundle up and "babel-ify" the source code for the browser. To do so, use the following command:
+ 
+ ```
+ yarn webpack
+ ```
+ 
+ This will generate bundles in the `dist/` directory that can be imported into web apps without conflicts.
