@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "test:lint": "eslint \"src/**/*.js\"",
-    "test": "jest --forceExit",
+    "test": "jest --forceExit --coverage",
     "webpack": "webpack",
     "watch": "webpack --watch",
     "map": "node src/cli.js"

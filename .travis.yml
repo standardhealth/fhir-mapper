@@ -6,6 +6,10 @@ node_js:
 script:
   - yarn test
   - yarn test:lint
+  - yarn webpack
+
+notifications:
+  email: false
 
 cache:
   yarn: true
