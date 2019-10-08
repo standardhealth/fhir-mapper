@@ -22,7 +22,7 @@ const hasProfileFromList = (resource, profiles) => {
   }
   // check if any of the profiles are mcode. returns null (falsy) if none found or the profile itself (truthy)
   return resource.meta.profile.find(p => profiles.includes(p));
-}
+};
 
 const applyProfileFunction = (profile) => {
     // return an anonymous function wrapper to apply this specific profile to given resources
@@ -30,15 +30,15 @@ const applyProfileFunction = (profile) => {
 };
 
 const addRelated = (resource, type, from) =>{
-  if(!resource || !type || !from) return
+  if (!resource || !type || !from) {return;}
   resource.related = resource.related || [];
   resource.related.push({
     type: type,
     target: {
-      reference: from.resourceType+"/"+from.id
+      reference: from.resourceType + '/' + from.id
     }
-  })
-}
+  });
+};
 
 // FHIRPath helper. FHIRPath tends to return things that are JS truthy (like empty arrays)
 // when we would expect a null or other falsy value instead
@@ -64,7 +64,7 @@ const find = (context, path, options = {}) => {
    if (typeof path === 'string') {
        path = fhirpath.compile(path, options);
    }
-   
+
    const results = context.filter( r => isTrue( path(r) ) );
    if (results.length === 0) {
        return null;

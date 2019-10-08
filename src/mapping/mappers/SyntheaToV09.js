@@ -1,31 +1,6 @@
 const { AggregateMapper } = require('../mapper');
 const { applyProfile, applyProfileFunction, hasProfileFromList, mcodeUtils09 } = require('../../utils');
 
-const defaultProfile = (resourceType) => {
-    switch (resourceType) {
-        case 'MedicationOrder':
-            return 'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-MedicationRequest';
-
-        case 'AllergyIntolerance':
-        case 'Condition':
-        case 'DiagnosticReport':
-        case 'Encounter':
-        case 'MedicationAdministration':
-        case 'MedicationRequest':
-        case 'Observation':
-        case 'Organization':
-        case 'Patient':
-        case 'Practitioner':
-        case 'Procedure':
-            return `http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-${resourceType}`;
-
-        default:
-            // notable resourceTypes used in Synthea that do not have an SHR profile: CarePlan, Goal, Claim, Immunization, ImagingStudy
-            // for that reason, only apply profiles we know actually exist
-            return null;
-    }
-};
-
 const allRelevantProfiles = [
     'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-AllergyIntolerance',
     'http://hl7.org/fhir/us/shr/DSTU2/StructureDefinition/shr-core-Condition',
@@ -75,7 +50,7 @@ const stripParens = (string) => {
 const resourceMapping = {
     filter: () => true,
     ignore: (resource) => hasProfileFromList(resource, allRelevantProfiles),
-    default: (resource, _context) => applyProfile(resource, defaultProfile(resource.resourceType)),
+    default: (resource, _context) => applyProfile(resource, mcodeUtils09.defaultProfile(resource.resourceType)),
     mappers: [
         {
             filter: "Observation.code.coding.where($this.code = '55284-4')",
