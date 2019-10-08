@@ -50,7 +50,7 @@ const stripParens = (string) => {
 const resourceMapping = {
     filter: () => true,
     ignore: (resource) => hasProfileFromList(resource, allRelevantProfiles),
-    default: (resource, _context) => applyProfile(resource, defaultProfile(resource.resourceType)),
+    default: (resource, _context) => applyProfile(resource, mcodeUtils09.defaultProfile(resource.resourceType)),
     mappers: [
         {
             filter: "Observation.code.coding.where($this.code = '55284-4')",
