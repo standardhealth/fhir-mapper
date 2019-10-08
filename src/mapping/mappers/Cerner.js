@@ -3,7 +3,7 @@ const { AggregateMapper } = require('../mapper');
 const utils = require('../../utils');
 const mcodeUtils09 = utils.mcodeUtils09;
 
-let vars = {
+const vars = {
   pStageCodes: [ 'AJCCV8 MAG-PRO P Stage', 'AJCCV8 BRE-INV P Stage'],
   cStageCodes: ['AJCCV8 MAG-PRO C Stage', 'AJCCV8 BRE-INV C Stage'],
   pTCodes: ['AJCCV8 MAG-PRO T Category P', 'AJCCV8 BRE-INV T Category P'],
@@ -19,31 +19,31 @@ let vars = {
 };
 
 
-let simpleValueToCoded = (resource) => {
+const simpleValueToCoded = (resource) => {
   resource.valueCodeableConcept.coding = [{
     code: resource.valueCodeableConcept.text,
     display: resource.valueCodeableConcept.text
   }];
-}
+};
 
-let pathologicTPath = "Observation.code.text in %pTCodes"
-let pathologicNPath = "Observation.code.text in %pNCodes"
-let pathologicMPath = "Observation.code.text in %pMCodes"
+const pathologicTPath = 'Observation.code.text in %pTCodes';
+const pathologicNPath = 'Observation.code.text in %pNCodes';
+const pathologicMPath = 'Observation.code.text in %pMCodes';
 
-let clinicalTPath = "Observation.code.text in %cTCodes"
-let clinicalNPath = "Observation.code.text in %cNCodes"
-let clinicalMPath = "Observation.code.text in %cMCodes"
+const clinicalTPath = 'Observation.code.text in %cTCodes';
+const clinicalNPath = 'Observation.code.text in %cNCodes';
+const clinicalMPath = 'Observation.code.text in %cMCodes';
 
 const baseDefaultMapper = new SyntheaToV09();
 
-let mapper = {
+const mapper = {
   filter: () => true,
   default: (resource, context) => baseDefaultMapper.execute(resource, context),
   mappers: [
 
     {
       filter: 'Observation.code.text in %erCodes',
-      exec: (resource, context) => {
+      exec: (resource) => {
         resource.code.coding = [{
           code: '16112-5',
           system: 'http://loinc.org',
@@ -56,11 +56,11 @@ let mapper = {
     },
     {
       filter: 'Observation.code.text in %prCodes',
-      exec: (resource, context) => {
+      exec: (resource) => {
         resource.code.coding = [{
           code: '16113-3',
           system: 'http://loinc.org',
-          display:  'Progesterone receptor [Interpretation] in Tissue'
+          display: 'Progesterone receptor [Interpretation] in Tissue'
         }];
 
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TumorMarkerTest');
@@ -68,7 +68,7 @@ let mapper = {
       }
     }, {
       filter: 'Observation.code.text in %her2Codes',
-      exec: (resource, context) => {
+      exec: (resource) => {
         resource.code.coding = [{
           code: '48676-1',
           system: 'http://loinc.org',
@@ -79,7 +79,7 @@ let mapper = {
         return resource;
       }
     },
-   
+
     {
       filter: 'Observation.code.text  in %pStageCodes',
       exec: (resource, context) => {
@@ -89,11 +89,11 @@ let mapper = {
           display: 'Stage group.pathology'
         }];
 
-        simpleValueToCoded(resource)
-        utils.addRelated(resource, 'has-member', utils.find(context, pathologicTPath, vars))
-        utils.addRelated(resource, 'has-member', utils.find(context, pathologicNPath, vars))
-        utils.addRelated(resource, 'has-member', utils.find(context, pathologicMPath, vars))
-        
+        simpleValueToCoded(resource);
+        utils.addRelated(resource, 'has-member', utils.find(context, pathologicTPath, vars));
+        utils.addRelated(resource, 'has-member', utils.find(context, pathologicNPath, vars));
+        utils.addRelated(resource, 'has-member', utils.find(context, pathologicMPath, vars));
+
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicStageGroup');
         return resource;
@@ -108,11 +108,11 @@ let mapper = {
           display: 'Stage group.clinical'
         }];
 
-        simpleValueToCoded(resource)
-        utils.addRelated(resource, 'has-member', utils.find(context, clinicalTPath, vars))
-        utils.addRelated(resource, 'has-member', utils.find(context, clinicalNPath, vars))
-        utils.addRelated(resource, 'has-member', utils.find(context, clinicalMPath, vars))
-        
+        simpleValueToCoded(resource);
+        utils.addRelated(resource, 'has-member', utils.find(context, clinicalTPath, vars));
+        utils.addRelated(resource, 'has-member', utils.find(context, clinicalNPath, vars));
+        utils.addRelated(resource, 'has-member', utils.find(context, clinicalMPath, vars));
+
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMClinicalStageGroup');
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         return resource;
@@ -127,7 +127,7 @@ let mapper = {
           display: 'Distant metastases.pathology'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicDistantMetastasesCategory');
         return resource;
@@ -142,7 +142,7 @@ let mapper = {
           display: 'Regional lymph nodes.pathologic'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicRegionalNodesCategory');
         return resource;
@@ -157,7 +157,7 @@ let mapper = {
           display: 'Primary tumor.pathology'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMPathologicPrimaryTumorCategory');
         return resource;
@@ -172,7 +172,7 @@ let mapper = {
           display: 'Distant metastases.clinical'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalDistantMetastasesCategory');
         return resource;
@@ -187,7 +187,7 @@ let mapper = {
           display: 'Regional lymph nodes.clinical'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
 
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalRegionalNodesCategory');
@@ -203,7 +203,7 @@ let mapper = {
           display: 'Primary tumor.clinical'
         }];
 
-        simpleValueToCoded(resource)
+        simpleValueToCoded(resource);
 
         mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
         utils.applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-TNMClinicalPrimaryTumorCategory');
@@ -214,64 +214,64 @@ let mapper = {
 };
 
 class Cerner extends AggregateMapper {
-    constructor(variables = {}) {
-        super(mapper, { ...vars, ...variables });
-    }
+  constructor(variables = {}) {
+    super(mapper, { ...vars, ...variables });
+  }
 }
 
 module.exports = Cerner;
 
 
- // {
-    //   filter: "Observation.code.text = 'AJCCV7 Breast Distant Metastasis (M) Pat'",
-    //   exec: (resource, context) => {
-    //     resource.code.coding = [{
-    //       code: '21901-4',
-    //       system: 'http://loinc.org'
-    //     }];
-    //     simpleValueToCoded(resource)
-    //     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
-    //     // utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMPathologicDistantMetastasesClassification');
-    //     return resource;
-    //   }
-    // },
-    // {
-    //   filter: "Observation.code.text  = 'AJCCV7 Breast Distant Metastasis (M) Cli'",
-    //   exec: (resource, context) => {
-    //     resource.code.coding = [{
-    //       code: '21907-1',
-    //       system: 'http://loinc.org'
-    //     }];
-    //     simpleValueToCoded(resource)
-    //     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
-    //     utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMClinicalDistantMetastasesClassification');
-    //     return resource;
-    //   }
-    // },
-    // {
-    //   filter: "Observation.code.text  = 'AJCCV7 Breast Regional Lymph Nodes (N) P'",
-    //   exec: (resource, context) => {
-    //     resource.code.coding = [{
-    //       code: '21900-6',
-    //       system: 'http://loinc.org'
-    //     }];
-    //     simpleValueToCoded(resource)
-    //     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
-    //     //utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMPatholgicRegionalNodesClassification');
-    //     return resource;
-    //   }
-    // },
-    // {
-    //   filter: "Observation.code.text  = 'AJCCV7 Breast Regional Lymph Nodes (N) C'",
-    //   exec: (resource, context) => {
-    //     resource.code.coding = [{
-    //       code: '21906-3',
-    //       system: 'http://loinc.org'
-    //     }];
+// {
+//   filter: "Observation.code.text = 'AJCCV7 Breast Distant Metastasis (M) Pat'",
+//   exec: (resource, context) => {
+//     resource.code.coding = [{
+//       code: '21901-4',
+//       system: 'http://loinc.org'
+//     }];
+//     simpleValueToCoded(resource)
+//     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
+//     // utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMPathologicDistantMetastasesClassification');
+//     return resource;
+//   }
+// },
+// {
+//   filter: "Observation.code.text  = 'AJCCV7 Breast Distant Metastasis (M) Cli'",
+//   exec: (resource, context) => {
+//     resource.code.coding = [{
+//       code: '21907-1',
+//       system: 'http://loinc.org'
+//     }];
+//     simpleValueToCoded(resource)
+//     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
+//     utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMClinicalDistantMetastasesClassification');
+//     return resource;
+//   }
+// },
+// {
+//   filter: "Observation.code.text  = 'AJCCV7 Breast Regional Lymph Nodes (N) P'",
+//   exec: (resource, context) => {
+//     resource.code.coding = [{
+//       code: '21900-6',
+//       system: 'http://loinc.org'
+//     }];
+//     simpleValueToCoded(resource)
+//     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
+//     //utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMPatholgicRegionalNodesClassification');
+//     return resource;
+//   }
+// },
+// {
+//   filter: "Observation.code.text  = 'AJCCV7 Breast Regional Lymph Nodes (N) C'",
+//   exec: (resource, context) => {
+//     resource.code.coding = [{
+//       code: '21906-3',
+//       system: 'http://loinc.org'
+//     }];
 
-    //     simpleValueToCoded(resource)
-    //     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
-    //     utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMClinicalRegionalNodesClassification');
-    //     return resource;
-    //   }
-    // },
+//     simpleValueToCoded(resource)
+//     mcodeUtils09.addRelatedCancerConditionExtension(resource, context);
+//     utils.applyProfile(resource, 'http://hl7.org/fhir/us/fhirURL/StructureDefinition/onco-core-TNMClinicalRegionalNodesClassification');
+//     return resource;
+//   }
+// },

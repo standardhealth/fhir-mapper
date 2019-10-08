@@ -1,0 +1,13 @@
+language: node_js
+
+node_js:
+  - "10"
+
+script:
+  - yarn test
+  - yarn test:lint
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
