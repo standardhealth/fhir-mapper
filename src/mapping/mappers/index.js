@@ -4,8 +4,8 @@ const Cerner = require('./Cerner');
 const OpenEpicMapper = require('./OpenEpic');
 
 module.exports = {
-    SyntheaToV05,
-    SyntheaToV09,
-    Cerner,
-    OpenEpicMapper
+  SyntheaToV05,
+  SyntheaToV09,
+  Cerner,
+  OpenEpicMapper
 };

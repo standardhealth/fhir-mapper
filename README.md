@@ -1,5 +1,7 @@
 # FHIR Mapper
 
+[![Build Status](https://travis-ci.com/standardhealth/fhir-mapper.svg?branch=master)](https://travis-ci.com/standardhealth/fhir-mapper)
+
 Library for mapping various forms of FHIR to mCODE by adding mCODE profiles onto the incoming FHIR. 
 
 ## Current Mappers

@@ -5,7 +5,7 @@ const {isTrue} = require('../utils/common');
 // the resource.  If the value is a string it will try to require the function else {
 // if it is a function it will simply pass back the value of the argument.
 
-let buildProcessor = (arg) => {
+const buildProcessor = (arg) => {
   let processor = null;
   switch (typeof arg) {
     case 'string':
@@ -22,16 +22,16 @@ let buildProcessor = (arg) => {
 // the filter may be a string or a function.  If it is a string it is treated as
 // a fhirpath expression and a filtering function will be built around that expression.
 // if it is a function then it will simply be returned.
-let buildFilter = (arg, variables = {}) => {
+const buildFilter = (arg, variables = {}) => {
   // if string create a filter out of it
   if (Array.isArray(arg)){
-    let filters = arg.map( f => buildFilter(f));
+    const filters = arg.map( f => buildFilter(f));
     return (resource) => {return filters.find( filter => isTrue(filter(resource)));};
   }
   let filter = null;
   switch (typeof arg) {
     case 'string': {
-      let path = fhirpath.compile(arg, variables);
+      const path = fhirpath.compile(arg, variables);
       filter = (resource) => isTrue(path(resource));
       break;}
     case 'function':{
@@ -49,7 +49,7 @@ let buildFilter = (arg, variables = {}) => {
 // if the args are a json object with string: object mappings treate the strings as
 // potential filters and or descriptions of the mapper and return an aggregate or filter
 // mapper depending on the rest of the attributes in the json object.
-let buildMappers = (args, variables = {}) =>{
+const buildMappers = (args, variables = {}) =>{
   if (!args) {return [];}
   // if the args are an array build an array of mappers to return
   if (Array.isArray(args)){
@@ -62,9 +62,9 @@ let buildMappers = (args, variables = {}) =>{
   } else if (args.exec){
     return new FilterMapper(args, variables);
   } else { // treat this like an object mapping of  {"filter" : {mapping attributes}}
-    let mappers = [];
+    const mappers = [];
     for (var filter in args){
-      let mapper = args[filter];
+      const mapper = args[filter];
       if (typeof mapper === 'string'){
         mappers.push(require(mapper));
       } else if (typeof mapper === 'object' && !mapper.constructor.name === 'Object'){
@@ -137,7 +137,7 @@ class AggregateMapper {
     } else {
       if (this.ignore(resource, context) || !this.filter(resource, context)){return resource;}
       if (this.exclude(resource, context)){return null;}
-      let mapper = this.mappers.find(map => map.filter(resource, context));
+      const mapper = this.mappers.find(map => map.filter(resource, context));
       if (mapper){
         return mapper.execute(resource, context);
       } else {

@@ -1,0 +1,17 @@
+language: node_js
+
+node_js:
+  - "10"
+
+script:
+  - yarn test
+  - yarn lint
+  - yarn webpack
+
+notifications:
+  email: false
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
