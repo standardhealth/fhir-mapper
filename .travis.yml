@@ -5,7 +5,7 @@ node_js:
 
 script:
   - yarn test
-  - yarn test:lint
+  - yarn lint
   - yarn webpack
 
 notifications:

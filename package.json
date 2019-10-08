@@ -6,8 +6,8 @@
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
   "license": "MIT",
   "scripts": {
-    "test:lint": "eslint \"src/**/*.js\"",
-    "test": "jest --forceExit --coverage",
+    "lint": "eslint \"src/**/*.js\"",
+    "test": "jest --forceExit",
     "webpack": "webpack",
     "watch": "webpack --watch",
     "map": "node src/cli.js"
