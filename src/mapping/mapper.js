@@ -128,9 +128,11 @@ class AggregateMapper {
       return resource.map( r => this.execute(r, context)).filter(n => n);
     } else if (resource.resourceType === 'Bundle') {
       resource.entry = resource.entry.map(e => {
+        const { fullUrl, request, resource: entryResource } = e;
         return {
-          fullUrl: e.fullUrl,
-          resource: this.execute(e.resource, context)
+          fullUrl,
+          resource: this.execute(entryResource, context),
+          request
         };
       });
       return resource;
