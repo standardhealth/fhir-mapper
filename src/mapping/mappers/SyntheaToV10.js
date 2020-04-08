@@ -1,5 +1,5 @@
 const { AggregateMapper } = require('../mapper');
-const { applyProfile, applyProfileFunction, hasProfileFromList, mcodeUtils10 } = require('../../utils');
+const { applyProfile, hasProfileFromList, mcodeUtils10 } = require('../../utils');
 
 const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status',
@@ -55,8 +55,8 @@ const resourceMapping = {
   // default: (resource, _context) => applyProfile(resource, mcodeUtils10.defaultProfile(resource.resourceType)),
   mappers: [
     {
-      filter: "Patient",
-      exec: (resource, context) => {
+      filter: 'Patient',
+      exec: (resource, _context) => {
         applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient');
 
         return resource;
@@ -98,7 +98,7 @@ const resourceMapping = {
     },
     {
       filter: 'Procedure.code.coding.where($this.code in %radiationCodes)',
-      exec: (resource, context) => {
+      exec: (resource, _context) => {
         applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-radiation-procedure');
 
         if (resource.code.coding[0].code === '33195004' ||
@@ -116,12 +116,12 @@ const resourceMapping = {
     },
     {
       filter: 'Procedure.code.coding.where($this.code in %surgeryCodes))',
-      exec: (resource, context) => {
+      exec: (resource, _context) => {
         applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure');
 
         if (resource.code.coding[0].code === '392021009') {
           // this code isn't actually in the VS, but its parent code is.
-          // a rare occurrence 
+          // a rare occurrence
           resource.code.coding.unshift({ system: 'http://snomed.info/sct', code: '64368001', display: 'Partial mastectomy (procedure)'});
         }
 
@@ -135,7 +135,7 @@ const resourceMapping = {
 
         resource.category = resource.category || [];
         resource.category.unshift({ coding: [{ system: 'http://snomed.info/sct', code: '64572001', display: 'Disease (disorder)' }] });
-        
+
         // add references to staging in Condition.stage.assessment
         // rather than look around for everything here, use the existing infrastructure to add it from elsewhere
 
@@ -148,7 +148,7 @@ const resourceMapping = {
           // add co-morbid category as well
 
           condition.category = condition.category || [];
-          condition.category.unshift({ 
+          condition.category.unshift({
             text: 'Co-morbid conditions',
             coding: [{
               system: 'http://snomed.info/sct',
@@ -232,8 +232,8 @@ const resourceMapping = {
           const thisStage = {
             type: { coding: [{ system: 'http://snomed.info/sct', code: '260998006', display: 'Clinical staging (qualifier value)' }] },
             summary: resource.valueCodeableConcept,
-            assessment: [] 
-          };          thisStage.assessment.push({ reference: 'Observation/'+resource.id }); // THIS resource
+            assessment: []
+          }; thisStage.assessment.push({ reference: 'Observation/' + resource.id }); // THIS resource
           thisStage.assessment.push(...resource.hasMember); // and this resource's components
           primaryCancer.stage.push(thisStage);
         }
@@ -309,9 +309,9 @@ const resourceMapping = {
           const thisStage = {
             type: { coding: [{ system: 'http://snomed.info/sct', code: '261023001', display: 'Pathological staging (qualifier value)' }] },
             summary: resource.valueCodeableConcept,
-            assessment: [] 
+            assessment: []
           };
-          thisStage.assessment.push({ reference: 'Observation/'+resource.id }); // THIS resource
+          thisStage.assessment.push({ reference: 'Observation/' + resource.id }); // THIS resource
           thisStage.assessment.push(...resource.hasMember); // and this resource's components
           primaryCancer.stage.push(thisStage);
         }
@@ -343,7 +343,7 @@ const resourceMapping = {
             }
 
             delete resource.valueString;
-
+            break;
             // note intentional passthrough
           case '85319-2': // HER2
             resource.code.text = 'HER2 Receptor';
@@ -369,8 +369,8 @@ const resourceMapping = {
     },
     {
       filter: 'MedicationRequest.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
-      exec: (resource, context) => {
-        const converted = { 
+      exec: (resource, _context) => {
+        const converted = {
           resourceType: 'MedicationStatement',
           id: resource.id,
           meta: {
@@ -386,7 +386,7 @@ const resourceMapping = {
         if (converted.status === 'stopped') {
           converted.status = 'completed';
         }
-        
+
         return converted;
       }
     },
@@ -397,7 +397,7 @@ const resourceMapping = {
         if (resource.status === 'stopped') {
           resource.status = 'completed';
         }
-        
+
         return resource;
       }
     },
@@ -414,7 +414,7 @@ const resourceMapping = {
           coding.code = coding.display = 'laboratory';
         }
         return resource;
-      } 
+      }
     }
   ]
 };

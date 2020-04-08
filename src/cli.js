@@ -58,10 +58,10 @@ if (fs.lstatSync(input).isDirectory()) {
   const files = fs.readdirSync(input);
 
   for (const filename of files) {
-    if (!filename.endsWith('.json')) continue;
+    if (!filename.endsWith('.json')) {continue;}
     const file = path.join(input, filename);
-    if (fs.lstatSync(file).isDirectory()) continue;
-    
+    if (fs.lstatSync(file).isDirectory()) {continue;}
+
     console.log(`Processing ${file}`);
     processFile(file, output);
   }

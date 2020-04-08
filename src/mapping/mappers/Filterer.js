@@ -1,5 +1,5 @@
 const { AggregateMapper } = require('../mapper');
-const { applyProfile, applyProfileFunction, hasProfileFromList, mcodeUtils10 } = require('../../utils');
+const { hasProfileFromList } = require('../../utils');
 
 // these have nothing to do with mCODE and will just distract people
 const excludedTypes = [
@@ -12,14 +12,14 @@ const excludedProfiles = [
 
 const resourceMapping = {
   filter: () => true,
-  exclude: (resource) => 
+  exclude: (resource) =>
     excludedTypes.includes(resource.resourceType) || hasProfileFromList(resource, excludedProfiles),
   mappers: [
   ]
 };
 
 class Filterer extends AggregateMapper {
-  constructor(variables = {}) {
+  constructor(_variables = {}) {
     super(resourceMapping, { });
   }
 }

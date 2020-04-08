@@ -20,6 +20,7 @@
       "prefer-const": 2,
       "quotes": [2, "single", "avoid-escape"],
       "no-compare-neg-zero": 0,
+      "no-case-declarations": 0,
       "no-console": 0,
       "no-debugger": 2,
       "no-array-constructor": 2,

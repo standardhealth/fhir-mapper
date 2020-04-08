@@ -1,5 +1,5 @@
 const fhirpath = require('fhirpath');
-const {find, addExtension, isTrue} = require('./common');
+const {find, isTrue} = require('./common');
 
 
 // codes are listed with the modules they are used in
@@ -29,39 +29,39 @@ const fhirPathVariables = {
   ],
 
   comorbidConditionCodes: [
-// Include codes from http://snomed.info/sct where concept is-a 42343007 (Congestive heart failure)
-  '88805009', // chronic congestive heart failure
+    // Include codes from http://snomed.info/sct where concept is-a 42343007 (Congestive heart failure)
+    '88805009', // chronic congestive heart failure
 
-// Include codes from http://snomed.info/sct where concept is-a 38341003 (High blood pressure)
-  '59621000', // hypertension
+    // Include codes from http://snomed.info/sct where concept is-a 38341003 (High blood pressure)
+    '59621000', // hypertension
 
-// Include codes from http://snomed.info/sct where concept is-a 413839001 (Chronic lung disease (disorder))
-  '87433001', // copd: emphysema
-  '185086009', // copd: bronchitis
+    // Include codes from http://snomed.info/sct where concept is-a 413839001 (Chronic lung disease (disorder))
+    '87433001', // copd: emphysema
+    '185086009', // copd: bronchitis
 
-// Include codes from http://snomed.info/sct where concept is-a 73211009 (Diabetes mellitus)
-  '44054006', // diabetes
-// Include codes from http://snomed.info/sct where concept is-a 40930008 (Hypothyroidism)
-  '83664006', // hypothyroidism
+    // Include codes from http://snomed.info/sct where concept is-a 73211009 (Diabetes mellitus)
+    '44054006', // diabetes
+    // Include codes from http://snomed.info/sct where concept is-a 40930008 (Hypothyroidism)
+    '83664006', // hypothyroidism
 
-// Include codes from http://snomed.info/sct where concept is-a 42399005 (Renal failure syndrome)
-  '127013003', // diabetic renal disease
+    // Include codes from http://snomed.info/sct where concept is-a 42399005 (Renal failure syndrome)
+    '127013003', // diabetic renal disease
 
-// Include codes from http://snomed.info/sct where concept is-a 3723001 (Arthritis)
-  '239872002', // osteoarthritis of hip
-  '201834006', // OA of hand
-  '239873007', // OA of knee
+    // Include codes from http://snomed.info/sct where concept is-a 3723001 (Arthritis)
+    '239872002', // osteoarthritis of hip
+    '201834006', // OA of hand
+    '239873007', // OA of knee
 
-// Include codes from http://snomed.info/sct where concept is-a 414916001 (Obesity (disorder))
-  // NOTE: these 2 codes in Synthea are findings not disorders and are not in the VS
-  // '162864005', // obesity (bmi 30+)
-  // '408512008', // severely obese (bmi 40+)
+    // Include codes from http://snomed.info/sct where concept is-a 414916001 (Obesity (disorder))
+    // NOTE: these 2 codes in Synthea are findings not disorders and are not in the VS
+    // '162864005', // obesity (bmi 30+)
+    // '408512008', // severely obese (bmi 40+)
 
-// Include codes from http://snomed.info/sct where concept is-a 271737000 (Anemia)
-  '271737000', // anemia
+    // Include codes from http://snomed.info/sct where concept is-a 271737000 (Anemia)
+    '271737000', // anemia
 
-// Include codes from http://snomed.info/sct where concept is-a 35489007 (Depressive disorder)
-  '370143000', // major depressive disorder
+    // Include codes from http://snomed.info/sct where concept is-a 35489007 (Depressive disorder)
+    '370143000', // major depressive disorder
   ],
 
   surgeryCodes: [
@@ -145,7 +145,7 @@ const findPrimaryCancerCondition = (context) => {
 };
 
 const findComorbidConditions = (primaryCancer, context) => {
-    if (typeof context === 'object' && context.entry) {
+  if (typeof context === 'object' && context.entry) {
     // extract the entries from the bundle
     context = context.entry.map(e => e.resource);
     // otherwise assume it's an array of resources anyway
@@ -169,7 +169,7 @@ const findComorbidConditions = (primaryCancer, context) => {
   }
 
   return comorbidConditions;
-}
+};
 
 const setPrimaryCancerFocus = (resource, context) => {
   const primaryCancer = findPrimaryCancerCondition(context, resource);
