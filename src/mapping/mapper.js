@@ -134,7 +134,7 @@ class AggregateMapper {
           resource: this.execute(entryResource, context),
           request
         };
-      });
+      }).filter(e => e.resource);
       return resource;
     } else {
       if (this.ignore(resource, context) || !this.filter(resource, context)){return resource;}

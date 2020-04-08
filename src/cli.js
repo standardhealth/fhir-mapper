@@ -31,6 +31,14 @@ const processFile = (file, outfile) => {
   const fileContent = fs.readFileSync(file, 'utf8');
   const patient = JSON.parse(fileContent);
   const processedPatient = mapper.execute(patient, patient);
+  processedPatient.type = 'transaction';
+  processedPatient.entry.forEach(e => {
+    e.request = {
+      method: 'POST',
+      url: e.resource.resourceType
+    };
+  });
+
   const processedPatientJson = JSON.stringify(processedPatient, null, 2);
 
 
@@ -50,7 +58,10 @@ if (fs.lstatSync(input).isDirectory()) {
   const files = fs.readdirSync(input);
 
   for (const filename of files) {
+    if (!filename.endsWith('.json')) {continue;}
     const file = path.join(input, filename);
+    if (fs.lstatSync(file).isDirectory()) {continue;}
+
     console.log(`Processing ${file}`);
     processFile(file, output);
   }
