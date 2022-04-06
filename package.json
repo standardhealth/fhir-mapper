@@ -1,6 +1,12 @@
 {
   "name": "fhir-mapper",
   "version": "3.1.2",
+  "contributors": [
+    "Rob Dingwell <bobd@mitre.org>",
+    "Matthew Gramigna <mgramigna@mitre.org>",
+    "Dylan Hall <dehall@mitre.org>",
+    "Dylan Phelan <dtphelan1@gmail.com>"
+  ],
   "main": "dist/app.bundle.js",
   "repository": "git@github.com:standardhealth/fhir-mapper.git",
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
