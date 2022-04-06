@@ -46,7 +46,7 @@ const buildFilter = (arg, variables = {}) => {
 // if the args are an array return an array of mappers
 // if the args are an object that represent either an aggregate or filter mapper
 // create one and return it
-// if the args are a json object with string: object mappings treate the strings as
+// if the args are a json object with string: object mappings treat the strings as
 // potential filters and or descriptions of the mapper and return an aggregate or filter
 // mapper depending on the rest of the attributes in the json object.
 const buildMappers = (args, variables = {}) =>{
@@ -79,7 +79,7 @@ const buildMappers = (args, variables = {}) =>{
   }
 };
 
-// Class to contain other mappers in a heirachy.  In oder for the contained
+// Class to contain other mappers in a hierarchy.  In order for the contained
 // mappers to be executed they the filter would have to match for the containing
 // mapper.  This class can contain other aggregate mappers.
 class AggregateMapper {
@@ -137,19 +137,24 @@ class AggregateMapper {
       }).filter(e => e.resource);
       return resource;
     } else {
+      // If we're supposed to ignore this resource, or if the filter, just return unmodified resource
       if (this.ignore(resource, context) || !this.filter(resource, context)){return resource;}
+      // If we're supposed to exclude this resource from the bundle, return null
       if (this.exclude(resource, context)){return null;}
+      // Find the mapper whose filter returns this resource
       const mapper = this.mappers.find(map => map.filter(resource, context));
       if (mapper){
+        // Use that mapper to transform the resource
         return mapper.execute(resource, context);
       } else {
+        // If no mapper matches, use the default transform
         return this.default(resource, context);
       }
     }
   }
 }
 
-// Mapper that does the actual work of modifying a reasource.  These are the leaf
+// Mapper that does the actual work of modifying a resource.  These are the leaf
 // nodes of aggregate mappers.  The class contains a filter that must be matched by the
 // aggregate mapper and an exec function that will modify the resource.
 class FilterMapper {
