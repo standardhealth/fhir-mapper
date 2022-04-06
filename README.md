@@ -147,3 +147,15 @@ Processing ...
  ```
  
  This will generate bundles in the `dist/` directory that can be imported into web apps without conflicts.
+
+### More on Project Structure
+
+Below are diagrams exposing the structure of mappers themselves and how they relate. These diagrams were created using [draw.io](https://draw.io/) and can be updated by uploading the diagrams found in `/docs` to that application.
+
+#### A Deepdive on Mappers
+
+![An image exposing the constructor arguments, internal data, and methods of Aggregate and Filter Mappers](/docs/img/Mappers.drawio.png)
+
+#### How Components Connect in Practice
+
+![An image connecting XtoYMappers (e.g. SyntheaToV10Mapper) to the Aggregate Mapper they extend and the Filter Mappers that the instantiate](/docs/img/Exports%20and%20Relationships.drawio.png)
