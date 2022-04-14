@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "fhirpath": "^0.10.3",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.21"
   }
 }
