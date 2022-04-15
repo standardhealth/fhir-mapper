@@ -66,6 +66,9 @@ const resourceMapping = {
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
+        resource.code.coding[0].code = '97509-4';
+        resource.code.coding[0].display = 'Cancer Disease Progression';
+
         /* Valid codes are:
             260415000  Not detected (qualifier)
             268910001  Patient's condition improved (finding)
@@ -130,7 +133,6 @@ const resourceMapping = {
         applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-primary-cancer-condition');
 
         resource.category = resource.category || [];
-        resource.category.unshift({ coding: [{ system: 'http://snomed.info/sct', code: '64572001', display: 'Disease (disorder)' }] });
 
         // add references to staging in Condition.stage.assessment
         // rather than look around for everything here, use the existing infrastructure to add it from elsewhere
