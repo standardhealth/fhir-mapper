@@ -1,5 +1,9 @@
 const { AggregateMapper } = require('../mapper');
-const { applyProfile, hasProfileFromList, mcodeUtils10 } = require('../../utils');
+const {
+  applyProfile,
+  hasProfileFromList,
+  mcodeUtils10,
+} = require('../../utils');
 
 const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status',
@@ -20,7 +24,7 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group',
-  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker'
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker',
 ];
 
 const nthWord = (string, index) => {
@@ -33,16 +37,15 @@ const stripParens = (string) => {
 
   const endIndex = string.lastIndexOf('(');
 
-  if (endIndex === -1) {return string;}
+  if (endIndex === -1) {
+    return string;
+  }
 
   return string.slice(0, endIndex - 1); // endIndex - 1 because there's an extra space at the end too
 };
 
 // these have nothing to do with mCODE and will just distract people
-const excludedTypes = [
-  'Claim',
-  'ExplanationOfBenefit'
-];
+const excludedTypes = ['Claim', 'ExplanationOfBenefit'];
 
 const resourceMapping = {
   filter: () => true,
@@ -53,16 +56,21 @@ const resourceMapping = {
     {
       filter: 'Patient',
       exec: (resource, _context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient'
+        );
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '88040-1')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status');
-
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
@@ -79,58 +87,78 @@ const resourceMapping = {
         switch (resource.valueCodeableConcept.coding[0].code) {
           case '385633008': // Improving
             resource.valueCodeableConcept.coding[0].code = '268910001';
-            resource.valueCodeableConcept.coding[0].display = 'Patient\'s condition improved (finding)';
+            resource.valueCodeableConcept.coding[0].display =
+              "Patient's condition improved (finding)";
             break;
           case '230993007': // Worsening
             resource.valueCodeableConcept.coding[0].code = '271299001';
-            resource.valueCodeableConcept.coding[0].display = 'Patient\'s condition worsened (finding)';
+            resource.valueCodeableConcept.coding[0].display =
+              "Patient's condition worsened (finding)";
             break;
           default:
-            // do nothing
+          // do nothing
         }
 
-        resource.valueCodeableConcept.text = resource.valueCodeableConcept.coding[0].display = stripParens(resource.valueCodeableConcept.coding[0].display);
-
+        resource.valueCodeableConcept.text =
+          resource.valueCodeableConcept.coding[0].display = stripParens(
+            resource.valueCodeableConcept.coding[0].display
+          );
 
         return resource;
-      }
+      },
     },
     {
       filter: 'Procedure.code.coding.where($this.code in %radiationCodes)',
       exec: (resource, _context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-radiation-procedure');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-radiation-procedure'
+        );
 
-        if (resource.code.coding[0].code === '33195004' ||
-             resource.code.coding[0].code === '385798007' ) {
+        if (
+          resource.code.coding[0].code === '33195004' ||
+          resource.code.coding[0].code === '385798007'
+        ) {
           // 33195004: this code isn't actually in the VS, but 4 of its children are,
           // so for now just a replacement code that fits.
           // 385798007: just a generic code, not in the VS either.
           // i'm not a doctor but it seems like photon therapy is the most common?
           resource.code.coding[0].code = '448385000';
-          resource.code.coding[0].display = 'Megavoltage radiation therapy using photons (procedure)';
+          resource.code.coding[0].display =
+            'Megavoltage radiation therapy using photons (procedure)';
         }
 
         return resource;
-      }
+      },
     },
     {
       filter: 'Procedure.code.coding.where($this.code in %surgeryCodes))',
       exec: (resource, _context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure'
+        );
 
         if (resource.code.coding[0].code === '392021009') {
           // this code isn't actually in the VS, but its parent code is.
           // a rare occurrence
-          resource.code.coding.unshift({ system: 'http://snomed.info/sct', code: '64368001', display: 'Partial mastectomy (procedure)'});
+          resource.code.coding.unshift({
+            system: 'http://snomed.info/sct',
+            code: '64368001',
+            display: 'Partial mastectomy (procedure)',
+          });
         }
 
         return resource;
-      }
+      },
     },
     {
       filter: mcodeUtils10.PRIMARY_CANCER_CONDITION_FILTER,
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-primary-cancer-condition');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-primary-cancer-condition'
+        );
 
         resource.category = resource.category || [];
 
@@ -141,23 +169,28 @@ const resourceMapping = {
         // NOTE: this means that there cannot be a separate mapper for these
         const comorbid = mcodeUtils10.findComorbidConditions(resource, context);
         for (const condition of comorbid) {
-          applyProfile(condition, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition');
+          applyProfile(
+            condition,
+            'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition'
+          );
 
           // add co-morbid category as well
 
           condition.category = condition.category || [];
           condition.category.unshift({
             text: 'Co-morbid conditions',
-            coding: [{
-              system: 'http://snomed.info/sct',
-              code: '398192003',
-              display: 'Co-morbid conditions (finding)'
-            }]
+            coding: [
+              {
+                system: 'http://snomed.info/sct',
+                code: '398192003',
+                display: 'Co-morbid conditions (finding)',
+              },
+            ],
           });
         }
 
         return resource;
-      }
+      },
     },
     // { // All cancers in Synthea are intended to be primary, even if secondary codes are used
     //     filter: `Condition.code.coding.where(${listContains(SECONDARY_CANCER_CONDITION_CODES, '$this.code')})`,
@@ -166,161 +199,287 @@ const resourceMapping = {
     {
       filter: "Observation.code.coding.where($this.code = '21907-1')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-distant-metastases-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-distant-metastases-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'c' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'c' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21905-5')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'c' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'c' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21906-3')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'c' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'c' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21908-9')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group'
+        );
 
-        const primaryCancer = mcodeUtils10.setPrimaryCancerFocus(resource, context);
+        const primaryCancer = mcodeUtils10.setPrimaryCancerFocus(
+          resource,
+          context
+        );
 
         // keep only the second word of the code. ex "Stage 1A (qualifier value)" -> "1A"
-        const stage = nthWord(resource.valueCodeableConcept.coding[0].display, 1);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'c' + stage });
+        const stage = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          1
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'c' + stage,
+        });
 
         // find the 3 components and add them to related
         resource.hasMember = resource.hasMember || [];
 
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21905-5')"); // primary tumor
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21906-3')"); // regional nodes
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21907-1')"); // distant metastases
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21905-5')"
+        ); // primary tumor
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21906-3')"
+        ); // regional nodes
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21907-1')"
+        ); // distant metastases
 
         // add this staging and group members to the primary cancer
         if (primaryCancer) {
           primaryCancer.stage = primaryCancer.stage || [];
 
           const thisStage = {
-            type: { coding: [{ system: 'http://snomed.info/sct', code: '260998006', display: 'Clinical staging (qualifier value)' }] },
+            type: {
+              coding: [
+                {
+                  system: 'http://snomed.info/sct',
+                  code: '260998006',
+                  display: 'Clinical staging (qualifier value)',
+                },
+              ],
+            },
             summary: resource.valueCodeableConcept,
-            assessment: []
-          }; thisStage.assessment.push({ reference: 'Observation/' + resource.id }); // THIS resource
+            assessment: [],
+          };
+          thisStage.assessment.push({
+            reference: 'Observation/' + resource.id,
+          }); // THIS resource
           thisStage.assessment.push(...resource.hasMember); // and this resource's components
           primaryCancer.stage.push(thisStage);
         }
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21901-4')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-distant-metastases-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-distant-metastases-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'p' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'p' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21899-0')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'p' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'p' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21900-6')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
         // keep only the first word of the code. ex "T1 category (finding)" -> "T1"
-        const category = nthWord(resource.valueCodeableConcept.coding[0].display, 0);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'p' + category });
+        const category = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          0
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'p' + category,
+        });
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '21902-2')",
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group'
+        );
 
-        const primaryCancer = mcodeUtils10.setPrimaryCancerFocus(resource, context);
+        const primaryCancer = mcodeUtils10.setPrimaryCancerFocus(
+          resource,
+          context
+        );
 
         // keep only the second word of the code. ex "Stage 1A (qualifier value)" -> "1A"
-        const stage = nthWord(resource.valueCodeableConcept.coding[0].display, 1);
-        resource.valueCodeableConcept.coding.push({ system: 'http://cancerstaging.org', code: 'p' + stage });
-
+        const stage = nthWord(
+          resource.valueCodeableConcept.coding[0].display,
+          1
+        );
+        resource.valueCodeableConcept.coding.push({
+          system: 'http://cancerstaging.org',
+          code: 'p' + stage,
+        });
 
         // find the 3 components and add them to related
         resource.hasMember = resource.hasMember || [];
 
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21899-0')"); // primary tumor
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21900-6')"); // regional nodes
-        mcodeUtils10.addStageGroupMember(resource, context, "Observation.code.coding.where($this.code = '21901-4')"); // distant metastases
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21899-0')"
+        ); // primary tumor
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21900-6')"
+        ); // regional nodes
+        mcodeUtils10.addStageGroupMember(
+          resource,
+          context,
+          "Observation.code.coding.where($this.code = '21901-4')"
+        ); // distant metastases
 
         // add this staging and group members to the primary cancer
         if (primaryCancer) {
           primaryCancer.stage = primaryCancer.stage || [];
 
           const thisStage = {
-            type: { coding: [{ system: 'http://snomed.info/sct', code: '261023001', display: 'Pathological staging (qualifier value)' }] },
+            type: {
+              coding: [
+                {
+                  system: 'http://snomed.info/sct',
+                  code: '261023001',
+                  display: 'Pathological staging (qualifier value)',
+                },
+              ],
+            },
             summary: resource.valueCodeableConcept,
-            assessment: []
+            assessment: [],
           };
-          thisStage.assessment.push({ reference: 'Observation/' + resource.id }); // THIS resource
+          thisStage.assessment.push({
+            reference: 'Observation/' + resource.id,
+          }); // THIS resource
           thisStage.assessment.push(...resource.hasMember); // and this resource's components
           primaryCancer.stage.push(thisStage);
         }
 
         return resource;
-      }
+      },
     },
     {
-      filter: 'Observation.code.coding.where($this.code in %tumorMarkerTestCodes)',
+      filter:
+        'Observation.code.coding.where($this.code in %tumorMarkerTestCodes)',
       exec: (resource, context) => {
-        applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker');
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker'
+        );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
 
@@ -342,18 +501,30 @@ const resourceMapping = {
 
             delete resource.valueString;
             break;
-            // note intentional passthrough
+          // note intentional passthrough
           case '85319-2': // HER2
             resource.code.text = 'HER2 Receptor';
-            resource.code.coding.unshift({ system: 'http://loinc.org', code: '48676-1', display: 'HER2 [Interpretation] in Tissue' });
+            resource.code.coding.unshift({
+              system: 'http://loinc.org',
+              code: '48676-1',
+              display: 'HER2 [Interpretation] in Tissue',
+            });
             break;
           case '85337-4': // ER
             resource.code.text = 'Estrogen Receptor';
-            resource.code.coding.unshift({ system: 'http://loinc.org', code: '16112-5', display: 'Estrogen receptor [Interpretation] in Tissue' });
+            resource.code.coding.unshift({
+              system: 'http://loinc.org',
+              code: '16112-5',
+              display: 'Estrogen receptor [Interpretation] in Tissue',
+            });
             break;
           case '85339-0': // PR
             resource.code.text = 'Progesterone Receptor';
-            resource.code.coding.unshift({ system: 'http://loinc.org', code: '16113-3', display: 'Progesterone receptor [Interpretation] in Tissue' });
+            resource.code.coding.unshift({
+              system: 'http://loinc.org',
+              code: '16113-3',
+              display: 'Progesterone receptor [Interpretation] in Tissue',
+            });
             break;
         }
 
@@ -363,22 +534,25 @@ const resourceMapping = {
         // }
 
         return resource;
-      }
+      },
     },
     {
-      filter: 'MedicationRequest.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
+      filter:
+        'MedicationRequest.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
       exec: (resource, _context) => {
         const converted = {
           resourceType: 'MedicationStatement',
           id: resource.id,
           meta: {
-            profile: ['http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-statement']
+            profile: [
+              'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-statement',
+            ],
           },
           status: resource.status,
           medicationCodeableConcept: resource.medicationCodeableConcept,
           subject: resource.subject,
           context: resource.context,
-          effectiveDateTime: resource.authoredOn
+          effectiveDateTime: resource.authoredOn,
         };
 
         if (converted.status === 'stopped') {
@@ -386,7 +560,7 @@ const resourceMapping = {
         }
 
         return converted;
-      }
+      },
     },
     {
       filter: 'MedicationRequest',
@@ -397,24 +571,24 @@ const resourceMapping = {
         }
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '44667-4')",
-      exec: _ => null // exclude "Site of distant metastasis in Breast tumor"
+      exec: (_) => null, // exclude "Site of distant metastasis in Breast tumor"
     },
     {
       filter: "Observation.code.coding.where($this.code = '85352-3')",
       // should be category: laboratory, not imaging
-      exec: resource => {
+      exec: (resource) => {
         if (resource.category) {
           const coding = resource.category[0].coding[0];
           coding.code = coding.display = 'laboratory';
         }
         return resource;
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 
 class SyntheaToV10 extends AggregateMapper {
