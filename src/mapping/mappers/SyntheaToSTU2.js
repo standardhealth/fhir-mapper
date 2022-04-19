@@ -11,7 +11,7 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genomics-report',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-statement',
-  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-radiation-procedure',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-course-summary',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-ecog-performance-status',
@@ -112,20 +112,31 @@ const resourceMapping = {
       exec: (resource, _context) => {
         applyProfile(
           resource,
-          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-radiation-procedure'
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-course-summary'
         );
 
+        // 33195004: this code isn't actually in the VS, but 4 of its children are,
+        // so for now just a replacement code that fits.
+        // 385798007: just a generic code, not in the VS either.
         if (
           resource.code.coding[0].code === '33195004' ||
           resource.code.coding[0].code === '385798007'
         ) {
-          // 33195004: this code isn't actually in the VS, but 4 of its children are,
-          // so for now just a replacement code that fits.
-          // 385798007: just a generic code, not in the VS either.
-          // i'm not a doctor but it seems like photon therapy is the most common?
-          resource.code.coding[0].code = '448385000';
+          // Fixed code for radiotherapy course summary
+          // TODO: This is a placeholder code, replace once an actual SNOMED code is added to the spec
+          resource.code.coding[0].code = 'USCRS-33529';
           resource.code.coding[0].display =
-            'Megavoltage radiation therapy using photons (procedure)';
+            'Radiotherapy Course of Treatment (regime/therapy)';
+
+          resource.category = resource.category || [];
+          resource.category.unshift({
+            coding: [
+              {
+                system: 'http://snomed.info/sct',
+                code: '108290001',
+              },
+            ],
+          });
         }
 
         return resource;
