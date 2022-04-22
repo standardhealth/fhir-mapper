@@ -11,6 +11,7 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genomics-report',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-request',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-administration',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-course-summary',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition',
@@ -573,6 +574,18 @@ const resourceMapping = {
 
         return resource;
       },
+    },
+    {
+      filter:
+        'MedicationAdministration.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
+      exec: (resource, _context) => {
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-administration'
+        );
+
+        return resource;
+      }
     },
     {
       filter: "Observation.code.coding.where($this.code = '44667-4')",
