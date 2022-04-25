@@ -10,7 +10,8 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genomics-report',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient',
-  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-statement',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-request',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-administration',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-course-summary',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition',
@@ -551,27 +552,17 @@ const resourceMapping = {
       filter:
         'MedicationRequest.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
       exec: (resource, _context) => {
-        const converted = {
-          resourceType: 'MedicationStatement',
-          id: resource.id,
-          meta: {
-            profile: [
-              'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-statement',
-            ],
-          },
-          status: resource.status,
-          medicationCodeableConcept: resource.medicationCodeableConcept,
-          subject: resource.subject,
-          context: resource.context,
-          effectiveDateTime: resource.authoredOn,
-        };
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-request'
+        );
 
-        if (converted.status === 'stopped') {
-          converted.status = 'completed';
+        if (resource.status === 'stopped') {
+          resource.status = 'completed';
         }
 
-        return converted;
-      },
+        return resource;
+      }
     },
     {
       filter: 'MedicationRequest',
@@ -583,6 +574,18 @@ const resourceMapping = {
 
         return resource;
       },
+    },
+    {
+      filter:
+        'MedicationAdministration.medicationCodeableConcept.coding.where($this.code in %medicationCodes)',
+      exec: (resource, _context) => {
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-administration'
+        );
+
+        return resource;
+      }
     },
     {
       filter: "Observation.code.coding.where($this.code = '44667-4')",
