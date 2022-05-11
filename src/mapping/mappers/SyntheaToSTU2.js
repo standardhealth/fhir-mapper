@@ -611,7 +611,9 @@ const resourceMapping = {
           'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-size'
         );
 
-        if (!resource.component) resource.component = [];
+        if (!resource.component) {
+          resource.component = [];
+        }
 
         resource.component.push({
           code: {
