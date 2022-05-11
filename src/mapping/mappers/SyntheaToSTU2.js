@@ -26,6 +26,7 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-size',
 ];
 
 const nthWord = (string, index) => {
@@ -562,7 +563,7 @@ const resourceMapping = {
         }
 
         return resource;
-      }
+      },
     },
     {
       filter: 'MedicationRequest',
@@ -585,7 +586,7 @@ const resourceMapping = {
         );
 
         return resource;
-      }
+      },
     },
     {
       filter: "Observation.code.coding.where($this.code = '44667-4')",
@@ -599,6 +600,45 @@ const resourceMapping = {
           const coding = resource.category[0].coding[0];
           coding.code = coding.display = 'laboratory';
         }
+        return resource;
+      },
+    },
+    {
+      filter: "Observation.code.coding.where($this.code = '33728-7')",
+      exec: (resource) => {
+        applyProfile(
+          resource,
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-size'
+        );
+
+        if (!resource.component) resource.component = [];
+
+        resource.component.push({
+          code: {
+            coding: [
+              {
+                system: 'http://loinc.org',
+                code: '33728-7',
+                display: 'Size.maximum dimension in Tumor',
+              },
+            ],
+          },
+          valueQuantity: {
+            ...resource.valueQuantity,
+          },
+        });
+
+        resource.code = {
+          coding: [
+            {
+              code: '21889-1',
+              system: 'http://loinc.org',
+              display: 'Size Tumor',
+            },
+          ],
+        };
+
+        delete resource.valueQuantity;
         return resource;
       },
     },
