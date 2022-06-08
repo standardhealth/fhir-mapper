@@ -5,6 +5,7 @@ const {
   mcodeUtils10,
 } = require('../../utils');
 const fhirpath = require('fhirpath');
+const crypto = require('crypto');
 
 const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status',
@@ -257,6 +258,9 @@ const resourceMapping = {
               },
             });
           });
+          const hash = crypto.createHash('sha256');
+          const observationId = hash.update(JSON.stringify(comorbidObservation)).digest('hex');
+          comorbidObservation.id = observationId;
           returnResources.push(comorbidObservation);
         }
         return returnResources;

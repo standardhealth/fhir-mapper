@@ -141,7 +141,10 @@ class AggregateMapper {
           additionalEntries.push(
             ...mappedResources.slice(1, mappedResources.length + 1)
               .map(mappedResource => {
-                return {resource: mappedResource};
+                return {
+                  fullUrl: `urn:uuid:${mappedResource.id}`,
+                  resource: mappedResource
+                };
               }));
           return {
             fullUrl,
