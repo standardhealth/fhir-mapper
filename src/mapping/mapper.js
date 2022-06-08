@@ -140,14 +140,14 @@ class AggregateMapper {
         } else {
           additionalEntries.push(
             ...mappedResources.slice(1, mappedResources.length + 1)
-            .map(mappedResource => {
-              return {resource: mappedResource}
-            }));
+              .map(mappedResource => {
+                return {resource: mappedResource};
+              }));
           return {
             fullUrl,
             resource: mappedResources[0],
             request
-          }
+          };
         }
       });
       resource.entry.push(...additionalEntries);

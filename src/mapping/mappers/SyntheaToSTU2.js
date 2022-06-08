@@ -203,24 +203,24 @@ const resourceMapping = {
         );
         if (comorbidConditions.length > 0) {
           const comorbidObservation = {
-              resourceType: 'Observation',
-              meta: {
-                profile: [
-                  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbidities-elixhauser',
-                ],
-              },
-              status: 'final',
-              code: {
-                coding: [
-                  {
-                    system:
-                      'http://hl7.org/fhir/us/mcode/CodeSystem/loinc-requested-cs',
-                    code: 'comorbidities-elixhauser',
-                    display: 'Elixhauser Comorbidity Panel',
-                  },
-                ],
-              },
-              component: [],
+            resourceType: 'Observation',
+            meta: {
+              profile: [
+                'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbidities-elixhauser',
+              ],
+            },
+            status: 'final',
+            code: {
+              coding: [
+                {
+                  system:
+                    'http://hl7.org/fhir/us/mcode/CodeSystem/loinc-requested-cs',
+                  code: 'comorbidities-elixhauser',
+                  display: 'Elixhauser Comorbidity Panel',
+                },
+              ],
+            },
+            component: [],
           };
 
           comorbidConditions.forEach((condition) => {
