@@ -4,6 +4,7 @@ const {
   hasProfileFromList,
   mcodeUtils10,
 } = require('../../utils');
+const fhirpath = require('fhirpath');
 
 const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status',
@@ -14,7 +15,6 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-medication-administration',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-course-summary',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure',
-  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-ecog-performance-status',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-genetic-specimen',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-genomic-region-studied',
@@ -28,6 +28,21 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-size',
 ];
+
+const comorbidityToElixhauserMap = {
+  88805009: 'CHF',
+  44054006: 'DIAB_UNCX',
+  83664006: 'THYROID_HYPO',
+  59621000: 'HTN_CX',
+  87433001: 'LUNG_CHRONIC',
+  185086009: 'LUNG_CHRONIC',
+  127013003: 'RENLFL_MOD',
+  239872002: 'ARTH',
+  201834006: 'ARTH',
+  239873007: 'ARTH',
+  271737000: 'BLDLOSS',
+  370143000: 'DEPRESS',
+};
 
 const nthWord = (string, index) => {
   return string.split(' ')[index];
@@ -168,41 +183,83 @@ const resourceMapping = {
     {
       filter: mcodeUtils10.PRIMARY_CANCER_CONDITION_FILTER,
       exec: (resource, context) => {
+        const returnResources = [];
         applyProfile(
           resource,
           'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-primary-cancer-condition'
         );
 
         resource.category = resource.category || [];
+        returnResources.push(resource);
 
         // add references to staging in Condition.stage.assessment
         // rather than look around for everything here, use the existing infrastructure to add it from elsewhere
 
-        // add comorbid conditions. search through other conditions and tag any that overlap
+        // Add comorbid conditions to Comorbidities Elixhauser Profile. search through other conditions and tag any that overlap
         // NOTE: this means that there cannot be a separate mapper for these
-        const comorbid = mcodeUtils10.findComorbidConditions(resource, context);
-        for (const condition of comorbid) {
-          applyProfile(
-            condition,
-            'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition'
-          );
-
-          // add co-morbid category as well
-
-          condition.category = condition.category || [];
-          condition.category.unshift({
-            text: 'Co-morbid conditions',
-            coding: [
-              {
-                system: 'http://snomed.info/sct',
-                code: '398192003',
-                display: 'Co-morbid conditions (finding)',
+        const comorbidConditions = mcodeUtils10.findComorbidConditions(
+          resource,
+          context
+        );
+        if (comorbidConditions.length > 0) {
+          const comorbidObservation = {
+              resourceType: 'Observation',
+              meta: {
+                profile: [
+                  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbidities-elixhauser',
+                ],
               },
-            ],
-          });
-        }
+              status: 'final',
+              code: {
+                coding: [
+                  {
+                    system:
+                      'http://hl7.org/fhir/us/mcode/CodeSystem/loinc-requested-cs',
+                    code: 'comorbidities-elixhauser',
+                    display: 'Elixhauser Comorbidity Panel',
+                  },
+                ],
+              },
+              component: [],
+          };
 
-        return resource;
+          comorbidConditions.forEach((condition) => {
+            const conditionCoding = fhirpath.evaluate(
+              condition,
+              "Condition.code.coding.where(system='http://snomed.info/sct')"
+            )[0];
+            comorbidObservation.component.push({
+              extension: [
+                {
+                  url: 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition-reference',
+                  valueReference: {
+                    reference: `Condition/${condition.id}`,
+                  },
+                },
+              ],
+              code: {
+                coding: [
+                  {
+                    system:
+                      'http://hl7.org/fhir/us/mcode/CodeSystem/loinc-requested-cs',
+                    code: comorbidityToElixhauserMap[conditionCoding.code],
+                  },
+                ],
+              },
+              valueCodeableConcept: {
+                coding: [
+                  {
+                    system: 'http://snomed.info/sct',
+                    code: '52101004',
+                    display: 'Present (qualifier value)',
+                  },
+                ],
+              },
+            });
+          });
+          returnResources.push(comorbidObservation);
+        }
+        return returnResources;
       },
     },
     // { // All cancers in Synthea are intended to be primary, even if secondary codes are used
