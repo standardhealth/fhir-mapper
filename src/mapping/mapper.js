@@ -127,14 +127,34 @@ class AggregateMapper {
     if (Array.isArray(resource)){
       return resource.map( r => this.execute(r, context)).filter(n => n);
     } else if (resource.resourceType === 'Bundle') {
+      const additionalEntries = [];
       resource.entry = resource.entry.map(e => {
         const { fullUrl, request, resource: entryResource } = e;
-        return {
-          fullUrl,
-          resource: this.execute(entryResource, context),
-          request
-        };
-      }).filter(e => e.resource);
+        const mappedResources = this.execute(entryResource, context);
+        if (!Array.isArray(mappedResources)) {
+          return {
+            fullUrl,
+            resource: mappedResources,
+            request
+          };
+        } else {
+          additionalEntries.push(
+            ...mappedResources.slice(1, mappedResources.length + 1)
+              .map(mappedResource => {
+                return {
+                  fullUrl: `urn:uuid:${mappedResource.id}`,
+                  resource: mappedResource
+                };
+              }));
+          return {
+            fullUrl,
+            resource: mappedResources[0],
+            request
+          };
+        }
+      });
+      resource.entry.push(...additionalEntries);
+      resource.entry = resource.entry.filter(e => e.resource);
       return resource;
     } else {
       // If we're supposed to ignore this resource, or if the filter, just return unmodified resource
