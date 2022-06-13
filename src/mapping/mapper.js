@@ -134,7 +134,7 @@ class AggregateMapper {
         if (!Array.isArray(mappedResources)) {
           return {
             fullUrl,
-            resource: this.execute(entryResource, context),
+            resource: mappedResources,
             request
           };
         } else {
