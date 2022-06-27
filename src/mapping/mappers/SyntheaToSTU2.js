@@ -6,6 +6,7 @@ const {
 } = require('../../utils');
 const fhirpath = require('fhirpath');
 const crypto = require('crypto');
+const mcodeSTU2TumorMarkerTestVS = require('../../utils/valueSets/mcodeSTU2/mcode-tumor-marker-test-vs.json');
 
 const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-disease-status',
@@ -26,7 +27,7 @@ const allRelevantProfiles = [
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-primary-tumor-category',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tnm-regional-nodes-category',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-stage-group',
-  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker',
+  'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker-test',
   'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-size',
 ];
 
@@ -259,7 +260,9 @@ const resourceMapping = {
             });
           });
           const hash = crypto.createHash('sha256');
-          const observationId = hash.update(JSON.stringify(comorbidObservation)).digest('hex');
+          const observationId = hash
+            .update(JSON.stringify(comorbidObservation))
+            .digest('hex');
           comorbidObservation.id = observationId;
           returnResources.push(comorbidObservation);
         }
@@ -547,12 +550,25 @@ const resourceMapping = {
       },
     },
     {
-      filter:
-        'Observation.code.coding.where($this.code in %tumorMarkerTestCodes)',
+      filter: function (resource) {
+        return (
+          resource.resourceType === 'Observation' &&
+          resource.code.coding.some(
+            (codingObj) =>
+              mcodeSTU2TumorMarkerTestVS.compose.include[0].concept.find(
+                (coding) => coding.code === codingObj.code
+              ) ||
+              mcodeSTU2TumorMarkerTestVS.expansion.contains.find(
+                (coding) => coding.code === codingObj.code
+              )
+          )
+        );
+      },
+
       exec: (resource, context) => {
         applyProfile(
           resource,
-          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker'
+          'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-tumor-marker-test'
         );
 
         mcodeUtils10.setPrimaryCancerFocus(resource, context);
