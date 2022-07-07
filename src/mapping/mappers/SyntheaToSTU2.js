@@ -146,16 +146,22 @@ const resourceMapping = {
           resource.code.coding[0].code = 'USCRS-33529';
           resource.code.coding[0].display =
             'Radiotherapy Course of Treatment (regime/therapy)';
-
-          resource.category = resource.category || [];
-          resource.category.unshift({
-            coding: [
+          resource.code.coding[0].system =
+            'http://hl7.org/fhir/us/mcode/CodeSystem/snomed-requested-cs';
+          resource.category = resource.category || {};
+          if (resource.category.coding) {
+            resource.category.coding.unshift({
+              system: 'http://snomed.info/sct',
+              code: '108290001',
+            });
+          } else {
+            resource.category.coding = [
               {
                 system: 'http://snomed.info/sct',
                 code: '108290001',
               },
-            ],
-          });
+            ];
+          }
         }
 
         return resource;
@@ -392,9 +398,9 @@ const resourceMapping = {
             type: {
               coding: [
                 {
-                  system: 'http://snomed.info/sct',
-                  code: '260998006',
-                  display: 'Clinical staging (qualifier value)',
+                  system: 'http://loinc.org',
+                  code: '21908-9',
+                  display: 'Stage group.clinical Cancer',
                 },
               ],
             },
@@ -530,9 +536,9 @@ const resourceMapping = {
             type: {
               coding: [
                 {
-                  system: 'http://snomed.info/sct',
-                  code: '261023001',
-                  display: 'Pathological staging (qualifier value)',
+                  system: 'http://loinc.org',
+                  code: '21902-2',
+                  display: 'Stage group.pathology Cancer',
                 },
               ],
             },
