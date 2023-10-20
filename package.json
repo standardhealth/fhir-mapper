@@ -7,7 +7,7 @@
     "Dylan Hall <dehall@mitre.org>",
     "Dylan Phelan <dtphelan1@gmail.com>"
   ],
-  "main": "dist/app.bundle.js",
+  "main": "src/index.js",
   "repository": "git@github.com:standardhealth/fhir-mapper.git",
   "author": "Matthew Gramigna <mgramigna@mitre.org>",
   "license": "MIT",
