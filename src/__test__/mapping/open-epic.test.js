@@ -1,5 +1,4 @@
-const rewire = require('rewire');
-const { OpenEpicMapper } = rewire('../../mapping/mappers');
+const { OpenEpicMapper } = require('../../mapping/mappers');
 const allergyBundle = require('../fixtures/open-epic-bundle.json');
 
 describe('Open Epic Mapper Tests', () => {

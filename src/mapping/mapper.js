@@ -1,6 +1,6 @@
 const fhirpath = require('fhirpath');
 const {isTrue} = require('../utils/common');
-
+const fhirpath_r4_model = require('fhirpath/fhir-context/r4');
 // function to build the exec methods for FilterMappers.  The exec function modifies
 // the resource.  If the value is a string it will try to require the function else {
 // if it is a function it will simply pass back the value of the argument.
@@ -31,8 +31,8 @@ const buildFilter = (arg, variables = {}) => {
   let filter = null;
   switch (typeof arg) {
     case 'string': {
-      const path = fhirpath.compile(arg, variables);
-      filter = (resource) => isTrue(path(resource));
+      const path = fhirpath.compile(arg);
+      filter = (resource) => isTrue(path(resource,variables));
       break;}
     case 'function':{
       filter = arg;
