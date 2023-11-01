@@ -115,7 +115,7 @@ const resourceMapping = {
       }
     },
     {
-      filter: 'Procedure.code.coding.where($this.code in %surgeryCodes))',
+      filter: 'Procedure.code.coding.where($this.code in %surgeryCodes)',
       exec: (resource, _context) => {
         applyProfile(resource, 'http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-related-surgical-procedure');
 

@@ -87,7 +87,7 @@ const resourceMapping = {
       }
     },
     {
-      filter: 'Procedure.code.coding.where($this.code in %surgeryCodes))',
+      filter: 'Procedure.code.coding.where($this.code in %surgeryCodes)',
       exec: (resource, context) => {
         applyProfile(resource, 'http://hl7.org/fhir/us/shr/StructureDefinition/onco-core-CancerRelatedSurgicalProcedure');
 

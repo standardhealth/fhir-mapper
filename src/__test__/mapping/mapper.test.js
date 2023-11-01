@@ -1,10 +1,10 @@
 const rewire = require('rewire');
-const mapping = rewire('../../mapping/mapper'); // Bring your module in with rewire
-
+const mapping = require('../../mapping/mapper'); // Bring your module in with rewire
+const {isTrue} = require('../../utils/common');
 describe('Mapping Tests', () => {
 
   test('should be able to tell truthy things from falsy things', () => {
-    const isTrue = mapping.__get__('isTrue');
+
     expect(isTrue()).toBeFalsy();
     expect(isTrue(null)).toBeFalsy();
     expect(isTrue([null])).toBeFalsy();
@@ -21,24 +21,25 @@ describe('Mapping Tests', () => {
   });
 
   test('should be able to create a filter based off of a string', () => {
-    const buildFilter = mapping.__get__('buildFilter');
+    const buildFilter = mapping.buildFilter
     const filter = buildFilter('Patient.name');
     expect(filter).toBeTruthy();
     const resource1 = {resourceType: 'Patient', name: {given: 'James'}};
     const resource2 = {resourceType: 'Patient'};
+  
     expect(filter(resource1)).toBeTruthy();
     expect(filter(resource2)).toBeFalsy();
   });
 
   test('should be able to create a filter based off of a function', () => {
-    const buildFilter = mapping.__get__('buildFilter');
+    const buildFilter = mapping.buildFilter
     const func = (_arg) => true;
     const filter = buildFilter(func);
     expect(filter).toBe(func);
   });
 
   test('should be able to create a filter based off of an array of filters', () => {
-    const buildFilter = mapping.__get__('buildFilter');
+    const buildFilter = mapping.buildFilter
     const filters = ['Patient.name', 'Patient'];
     const filter = buildFilter(filters);
     expect(filter).toBeTruthy();
@@ -50,7 +51,7 @@ describe('Mapping Tests', () => {
   });
 
   test('should be able to create a filterMapper from json', () => {
-    const buildFilterMappers = mapping.__get__('buildMappers');
+    const buildFilterMappers = mapping.buildMappers;
     const filterJson = {filter: 'Patient.name',
       exec: (resource) => {
         resource.mapped = 'Its Mapped';
@@ -69,8 +70,8 @@ describe('Mapping Tests', () => {
   });
 
   test('should be able to create a filterMapper with a context', () => {
-    const buildFilterMappers = mapping.__get__('buildMappers');
-    const filterJson = {filter: 'Condition.code.coding.where($this.code in %codes.first())',
+    const buildFilterMappers = mapping.buildMappers;
+    const filterJson = {filter: 'Condition.code.coding.where($this.code in %codes)',
       exec: (resource) => {
         resource.mapped = 'Its Mapped';
         return resource;
@@ -109,7 +110,7 @@ describe('Mapping Tests', () => {
       ]
     };
 
-    const ResourceTypeMapper = mapping.__get__('AggregateMapper');
+    const ResourceTypeMapper = mapping.AggregateMapper;
     const rtm = new ResourceTypeMapper(resourceMapping);
     const resource1 = {resourceType: 'Patient', name: {given: 'James'}};
     const resource2 = {resourceType: 'Patient', meta: {profile: ['something']}};
@@ -162,7 +163,7 @@ describe('Mapping Tests', () => {
       ]
     };
 
-    const ResourceTypeMapper = mapping.__get__('AggregateMapper');
+    const ResourceTypeMapper = mapping.AggregateMapper;
     const rtm = new ResourceTypeMapper(resourceMapping);
     const james = {resourceType: 'Patient', name: {given: 'James'}};
     const bob = {resourceType: 'Patient', name: {given: 'Bob'}};

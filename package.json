@@ -1,6 +1,6 @@
 {
   "name": "fhir-mapper",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "contributors": [
     "Rob Dingwell <bobd@mitre.org>",
     "Matthew Gramigna <mgramigna@mitre.org>",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "crypto": "^1.0.1",
-    "fhirpath": "^0.10.3",
+    "fhirpath": "3.8.1",
     "lodash": "^4.17.21"
   }
 }
