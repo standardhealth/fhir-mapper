@@ -24,7 +24,7 @@ describe('Mapping Tests', () => {
     const buildFilter = mapping.buildFilter
     const filter = buildFilter('Patient.name');
     expect(filter).toBeTruthy();
-    const resource1 = {"resourceType": 'Patient', "name": {"given": 'James'}};
+    const resource1 = {resourceType: 'Patient', name: {given: 'James'}};
     const resource2 = {resourceType: 'Patient'};
   
     expect(filter(resource1)).toBeTruthy();
